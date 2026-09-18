@@ -53,8 +53,36 @@ curl -fsS http://localhost:8000/health
 
 curl -s -X POST http://localhost:8000/optimize-energy \
   -H "Content-Type: application/json" \
-  -d "$(jq '.cases[0].input' fixtures/public_cases.json)" | jq
+  -d "$(python -c "import json;print(json.dumps(json.load(open('fixtures/public_cases.json'))['cases'][0]['input']))")" \
+  | python -m json.tool
 # a full EnergyResponse: scenario_id, directive_interpretation, hourly_plan, totals, plan_summary
+```
+
+Needs nothing beyond the conda environment above — no `jq`, no extra tooling.
+
+### Run all ten public sample cases
+
+With the service running, from the repo root:
+
+```bash
+python evals/run_public.py --base-url http://localhost:8000
+```
+
+Expected output — a per-case table followed by:
+
+```
+=== 10/10 valid | 10/10 interpretation correct | 10/10 replay clean ===
+```
+
+For each case it compares `directive_interpretation` structurally against the published
+expectation (ignoring free-text wording, per the spec), independently replays the returned
+`hourly_plan` against the raw request, and checks the recalculated cost against the published
+reference. It also writes a timestamped JSON report under `evals/reports/`.
+
+To point the same check at the deployed service instead:
+
+```bash
+python evals/run_public.py --base-url https://gridwise.mangowater-ca3ac31c.southeastasia.azurecontainerapps.io
 ```
 
 ## Required environment variables
