@@ -6,10 +6,10 @@ is quoted from a committed file under `evals/reports/`; do not state a number th
 
 Recorded by Ridwan (macOS), screen-captured against the **live Azure endpoint**, not localhost.
 
-macOS notes for the demo commands below: they need `jq` (`brew install jq`) and a clone of this
-repo with the `gridwise` conda environment active, since they read `fixtures/public_cases.json`.
-Run them from the repo root. Nothing else is macOS-specific — the endpoint is the deployed one,
-so no local service needs to be running.
+macOS notes for `docs/live_demo.sh`: it needs `jq` (`brew install jq`) and a clone of this repo
+with the `gridwise` conda environment active, since it reads `fixtures/public_cases.json`. Run it
+from the repo root. Nothing else is macOS-specific — it targets the deployed endpoint, so no
+local service needs to be running.
 
 **Evidence shown as PDFs, demo run live.** Re-running `verify_lp.py` / `hedging_report.py` /
 all 10 public cases live on camera is slow and, for the live-HTTP one, subject to real provider
@@ -82,41 +82,28 @@ ensemble agrees — the common case, see `evals/reports/pdf/run_public_live_azur
 
 ## 2:05–2:40 — Live demo
 
-Against the **live deployed endpoint**:
+**Run:** `./docs/live_demo.sh` — one script against the **live deployed endpoint**. Four labeled
+steps: health check, SAMPLE-06 as published, SAMPLE-06 with one phrase changed ("about half" →
+"only about 10 percent"), then a printed side-by-side diff. Output goes to the screen and to a
+timestamped log under `/tmp/` for you to reference afterward.
 
-```bash
-FQDN=gridwise.mangowater-ca3ac31c.southeastasia.azurecontainerapps.io
+**Say while step 2 returns:** "SAMPLE-06 — cloud cover cuts solar to half of forecast from 10 AM
+to noon." *(cite the printed `total_cost_bdt` and `hour10.solar_used_kwh` — currently 34,090.00
+BDT and 75 kWh, but read the number the script just printed, not this one)*
 
-curl -fsS https://$FQDN/health
-# {"status":"ok"}
+**Say while step 3 returns:** "Same hours, a harsher reading of the same note — solar cut to 10%
+instead of 50%."
 
-curl -s -X POST https://$FQDN/optimize-energy \
-  -H "Content-Type: application/json" \
-  -d "$(jq '.cases[5].input' fixtures/public_cases.json)" | jq '{total_cost_bdt, hourly_plan: .hourly_plan[10:12]}'
-```
+**Say over step 4's side-by-side table:** "Solar use at hour 10 drops, grid import rises, and
+total cost moves up — the schedule visibly tracks the language, because the compiler and the LP
+are exact, not approximate."
 
-**Say while it returns:** "SAMPLE-06 — cloud cover cuts solar to half of forecast from 10 AM to
-noon. Hour 10: 75 kWh of solar used, 85 kWh from the grid, total cost 34,090 BDT."
-
-Now change one phrase in the note — "about half" becomes "only about 10 percent" — and re-run:
-
-```bash
-jq '.cases[5].input | .operator_notes[0] =
-  "Cloud cover during panel inspection will leave only about 10 percent of forecast solar output from 10 AM until noon."' \
-  fixtures/public_cases.json > /tmp/demo_changed.json
-
-curl -s -X POST https://$FQDN/optimize-energy \
-  -H "Content-Type: application/json" \
-  -d @/tmp/demo_changed.json | jq '{total_cost_bdt, hourly_plan: .hourly_plan[10:12]}'
-```
-
-**Say:** "Same hours, a harsher reading of the same note: solar use at hour 10 drops from 75 to 15
-kWh, grid import rises to 120, and total cost moves from 34,090 to 36,206 BDT. The schedule
-visibly tracks the language — because the compiler and the LP are exact, not approximate."
-
-*(Verified locally before recording: factor 0.5→0.1 on SAMPLE-06 moves hour-10 solar 75→15 kWh,
-grid 85→120 kWh, total cost 34,090.00→36,206.00 BDT. Confirm the same shift against the live
-endpoint during rehearsal before the real take.)*
+> **Why "read from the script, not memory":** the LP can have multiple equally-optimal solutions —
+> same total cost, different hourly grid/battery split. Rehearsing this found exactly that: an
+> earlier local run showed hour 10 as `grid=85, battery_discharge=5`, while a live Azure run
+> showed `grid=60, battery_discharge=30` — same total cost (34,090.00 BDT) both times, different
+> split. **Total cost and solar_used_kwh are stable and safe to cite by number; the exact
+> grid/battery split at any one hour is not** — always read it live from the script's output.
 
 ## 2:40–3:00 — Running it, and the Docker fallback
 
@@ -139,7 +126,8 @@ docker run --rm -p 8000:8000 --env-file .env \
 
 - [ ] `evals/reports/pdf/*.pdf` regenerated (`python docs/make_evidence_pdfs.py`) if any evidence
       report changed since the last render
-- [ ] Demo re-verified against the **live** endpoint during rehearsal, not just localhost
+- [ ] `docs/live_demo.sh` rehearsed against the **live** endpoint right before the real take (its
+      hourly grid/battery split can legitimately differ run to run; total cost should not)
 - [ ] Total runtime ≤ 3:00
 - [ ] Every number spoken matches a file under `evals/reports/` — no number invented for the video
 - [ ] No secret visible on screen (terminal history, `.env` contents, API keys)
