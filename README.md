@@ -45,9 +45,13 @@ cp .env.example .env
 uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
-In a second terminal:
+In a second terminal — `cd` into the repo first, and activate the environment, since the
+commands below read `fixtures/` and use the environment's Python:
 
 ```bash
+cd gridwise-llm-energy-optimizer
+conda activate gridwise
+
 curl -fsS http://localhost:8000/health
 # {"status":"ok"}
 
