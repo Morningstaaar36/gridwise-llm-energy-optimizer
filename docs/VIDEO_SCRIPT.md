@@ -11,6 +11,14 @@ repo with the `gridwise` conda environment active, since they read `fixtures/pub
 Run them from the repo root. Nothing else is macOS-specific — the endpoint is the deployed one,
 so no local service needs to be running.
 
+**Evidence shown as PDFs, demo run live.** Re-running `verify_lp.py` / `hedging_report.py` /
+all 10 public cases live on camera is slow and, for the live-HTTP one, subject to real provider
+rate limits — not worth the risk for numbers that are already verified and committed. Beats 2 and
+3 below show pre-rendered PDFs of that same evidence (`evals/reports/pdf/*.pdf`, built by
+`python docs/make_evidence_pdfs.py` — regenerate before recording if anything changes). **Only the
+live-demo beat (2:05–2:40) is actually run live**, against the real deployed endpoint, because
+that's the part that has to visibly prove the system is real, not a recording of a recording.
+
 ---
 
 ## 0:00–0:25 — The problem, in the operators' terms
@@ -46,8 +54,9 @@ on screen, because that was never wired into `app/energy/selection.py`; see `REA
 > compiler, so one bug can't fool both — rebuilds every number from the raw request before the
 > response ever leaves the API."
 
-**Cite:** `evals/reports/verify_lp_20260918_155109.txt` — LP optimum matches all ten published
-reference costs to **0.0000 BDT**, and all ten reference schedules replay clean.
+**Also show:** `evals/reports/pdf/verify_lp.pdf` — LP optimum matches all ten published reference
+costs to **0.0000 BDT**, and all ten reference schedules replay clean. (Source data:
+`evals/reports/verify_lp_20260918_172357.txt`.)
 
 ## 1:15–2:05 — The distinctive part: hedging across plausible readings
 
@@ -61,13 +70,15 @@ reference costs to **0.0000 BDT**, and all ten reference schedules replay clean.
 > A schedule feasible under that meet satisfies every one of those readings at once, because every
 > constraint here is a one-sided bound — a ceiling or a floor — so tightening never conflicts."
 
-**Cite:** `evals/reports/hedging_report_20260918_155109.txt` — measured on all ten public cases
-under worst-case synthetic disagreement: mean premium **2.07%**, max **5.67%** — roughly 0.2 of
-the 10 optimization points, spent to protect the 25-point interpretation category and the 25-point
+**Show:** `evals/reports/pdf/hedging_report.pdf` — measured on all ten public cases under
+worst-case synthetic disagreement: mean premium **2.07%**, max **5.67%** — roughly 0.2 of the 10
+optimization points, spent to protect the 25-point interpretation category and the 25-point
 constraint-correctness category from ever shipping a plan built on a single wrong reading. One
 case (SAMPLE-05) hit an infeasible full meet; the system automatically fell back to 3 of 4
-candidates rather than failing outright. When the ensemble agrees — the common case — this costs
-nothing.
+candidates rather than failing outright — visible in the PDF's "Candidates used" column. When the
+ensemble agrees — the common case, see `evals/reports/pdf/run_public_live_azure.pdf`'s empty
+`hedged_cases` — this costs nothing. (Source data:
+`evals/reports/hedging_report_20260918_172357.txt`.)
 
 ## 2:05–2:40 — Live demo
 
@@ -126,6 +137,8 @@ docker run --rm -p 8000:8000 --env-file .env \
 
 ## Recording checklist
 
+- [ ] `evals/reports/pdf/*.pdf` regenerated (`python docs/make_evidence_pdfs.py`) if any evidence
+      report changed since the last render
 - [ ] Demo re-verified against the **live** endpoint during rehearsal, not just localhost
 - [ ] Total runtime ≤ 3:00
 - [ ] Every number spoken matches a file under `evals/reports/` — no number invented for the video
