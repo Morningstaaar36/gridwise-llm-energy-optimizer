@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "gridwise/directive.schema.json",
+  "title": "LLM structured output — grammar-constrained decoding target",
+  "description": "This exact schema is handed to the model's structured-output / JSON-schema mode. Never widen it. `reasoning` is a free scratch field that the model fills BEFORE the directives (CRANE pattern); it is stripped before the response is built and is never returned to the judge.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["reasoning", "directive_interpretation"],
+  "properties": {
+    "reasoning": { "type": "string", "maxLength": 1200 },
+    "directive_interpretation": {
+      "type": "array", "minItems": 1, "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["note_index", "applies", "directive_type", "structured_adjustment", "explanation"],
+        "properties": {
+          "note_index": { "type": "integer", "minimum": 0, "maximum": 2 },
+          "applies":    { "type": "boolean" },
+          "directive_type": {
+            "type": "string",
+            "enum": ["solar_reduction", "minimum_battery_reserve", "no_charge_window",
+                     "no_discharge_window", "max_grid_window", "no_op"]
+          },
+          "structured_adjustment": {
+            "oneOf": [
+              { "type": "null" },
+              {
+                "type": "object", "additionalProperties": false,
+                "required": ["hours"],
+                "properties": {
+                  "hours": {
+                    "type": "array", "minItems": 1, "maxItems": 24,
+                    "items": { "type": "integer", "minimum": 0, "maximum": 23 }
+                  },
+                  "factor":             { "type": "number", "minimum": 0, "maximum": 1 },
+                  "minimum_energy_kwh": { "type": "number", "minimum": 0 },
+                  "max_grid_kwh":       { "type": "number", "minimum": 0 }
+                }
+              }
+            ]
+          },
+          "explanation": { "type": "string", "maxLength": 300 }
+        }
+      }
+    }
+  }
+}

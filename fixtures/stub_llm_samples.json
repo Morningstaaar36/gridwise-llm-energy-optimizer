@@ -1,0 +1,142 @@
+{
+  "scenario_id": "SAMPLE-01",
+  "note": "5 canned samples: 3 agree exactly (idx 0,1,3 -> same tensor), 1 hour-window error (idx 2), 1 factor flip (idx 4). Expected CS3 outcome: 3 classes, posterior {0.6, 0.2, 0.2}.",
+  "samples": [
+    {
+      "sample_index": 0,
+      "raw": {
+        "directive_interpretation": [
+          {
+            "note_index": 0,
+            "applies": true,
+            "directive_type": "solar_reduction",
+            "structured_adjustment": {
+              "hours": [
+                12,
+                13
+              ],
+              "factor": 0.25
+            },
+            "explanation": "Solar availability is reduced to 25% during the panel-cleaning window."
+          },
+          {
+            "note_index": 1,
+            "applies": false,
+            "directive_type": "no_op",
+            "structured_adjustment": null,
+            "explanation": "This note does not affect today's 24-hour energy schedule."
+          }
+        ]
+      }
+    },
+    {
+      "sample_index": 1,
+      "raw": {
+        "directive_interpretation": [
+          {
+            "note_index": 0,
+            "applies": true,
+            "directive_type": "solar_reduction",
+            "structured_adjustment": {
+              "hours": [
+                12,
+                13
+              ],
+              "factor": 0.25
+            },
+            "explanation": "Solar availability is reduced to 25% during the panel-cleaning window."
+          },
+          {
+            "note_index": 1,
+            "applies": false,
+            "directive_type": "no_op",
+            "structured_adjustment": null,
+            "explanation": "This note does not affect today's 24-hour energy schedule."
+          }
+        ]
+      }
+    },
+    {
+      "sample_index": 2,
+      "raw": {
+        "directive_interpretation": [
+          {
+            "note_index": 0,
+            "applies": true,
+            "directive_type": "solar_reduction",
+            "structured_adjustment": {
+              "hours": [
+                12,
+                13,
+                14
+              ],
+              "factor": 0.25
+            },
+            "explanation": "Solar availability is reduced to 25% during the panel-cleaning window."
+          },
+          {
+            "note_index": 1,
+            "applies": false,
+            "directive_type": "no_op",
+            "structured_adjustment": null,
+            "explanation": "This note does not affect today's 24-hour energy schedule."
+          }
+        ]
+      }
+    },
+    {
+      "sample_index": 3,
+      "raw": {
+        "directive_interpretation": [
+          {
+            "note_index": 0,
+            "applies": true,
+            "directive_type": "solar_reduction",
+            "structured_adjustment": {
+              "hours": [
+                12,
+                13
+              ],
+              "factor": 0.25
+            },
+            "explanation": "Solar availability is reduced to 25% during the panel-cleaning window."
+          },
+          {
+            "note_index": 1,
+            "applies": false,
+            "directive_type": "no_op",
+            "structured_adjustment": null,
+            "explanation": "This note does not affect today's 24-hour energy schedule."
+          }
+        ]
+      }
+    },
+    {
+      "sample_index": 4,
+      "raw": {
+        "directive_interpretation": [
+          {
+            "note_index": 0,
+            "applies": true,
+            "directive_type": "solar_reduction",
+            "structured_adjustment": {
+              "hours": [
+                12,
+                13
+              ],
+              "factor": 0.75
+            },
+            "explanation": "Solar availability is reduced to 25% during the panel-cleaning window."
+          },
+          {
+            "note_index": 1,
+            "applies": false,
+            "directive_type": "no_op",
+            "structured_adjustment": null,
+            "explanation": "This note does not affect today's 24-hour energy schedule."
+          }
+        ]
+      }
+    }
+  ]
+}

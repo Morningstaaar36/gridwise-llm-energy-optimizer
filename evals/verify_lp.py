@@ -2,6 +2,8 @@
 import json, math
 import numpy as np
 from scipy.optimize import linprog
+import pathlib
+_PACK = pathlib.Path(__file__).resolve().parent.parent / "fixtures" / "public_cases.json"
 
 BIG = 1e7
 H = 24
@@ -87,17 +89,18 @@ def replay(req, C, plan, tol=1e-6):
     if abs(e - float(bat["initial_energy_kwh"])) > 1e-4: errs.append("neutrality")
     return errs
 
-pack = json.load(open("/home/lucifer/Documents/bup/BUP_CSE_FEST_2026_Participant_Docs/BUP_CSE_FEST_2026_Preli_Public_Sample_Cases.json"))
-print(f"{'case':10} {'ref cost':>10} {'LP cost':>10} {'delta':>9}  replay")
-tot_ok = 0
-for case in pack["cases"]:
-    req = case["input"]; exp = case["expected_output"]
-    ds = [(d["directive_type"], d["structured_adjustment"]) for d in exp["directive_interpretation"]]
-    C = compile_constraints(req, ds)
-    r = solve(req, C)
-    refcost = exp["total_cost_bdt"]
-    errs = replay(req, C, exp["hourly_plan"])
-    ok = r.success and abs(r.fun - refcost) < 0.01 and not errs
-    tot_ok += ok
-    print(f"{case['id']:10} {refcost:10.2f} {r.fun:10.2f} {r.fun-refcost:9.4f}  {'OK' if not errs else errs}")
-print(f"\n{tot_ok}/10 cases: LP optimum == published reference cost AND reference plan replays clean")
+pack = json.loads(_PACK.read_text())
+if __name__ == "__main__":
+    print(f"{'case':10} {'ref cost':>10} {'LP cost':>10} {'delta':>9}  replay")
+    tot_ok = 0
+    for case in pack["cases"]:
+        req = case["input"]; exp = case["expected_output"]
+        ds = [(d["directive_type"], d["structured_adjustment"]) for d in exp["directive_interpretation"]]
+        C = compile_constraints(req, ds)
+        r = solve(req, C)
+        refcost = exp["total_cost_bdt"]
+        errs = replay(req, C, exp["hourly_plan"])
+        ok = r.success and abs(r.fun - refcost) < 0.01 and not errs
+        tot_ok += ok
+        print(f"{case['id']:10} {refcost:10.2f} {r.fun:10.2f} {r.fun-refcost:9.4f}  {'OK' if not errs else errs}")
+    print(f"\n{tot_ok}/10 cases: LP optimum == published reference cost AND reference plan replays clean")

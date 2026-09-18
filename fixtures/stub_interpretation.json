@@ -1,0 +1,236 @@
+{
+  "SAMPLE-01": [
+    {
+      "note_index": 0,
+      "applies": true,
+      "directive_type": "solar_reduction",
+      "structured_adjustment": {
+        "hours": [
+          12,
+          13
+        ],
+        "factor": 0.25
+      },
+      "explanation": "Solar availability is reduced to 25% during the panel-cleaning window."
+    },
+    {
+      "note_index": 1,
+      "applies": false,
+      "directive_type": "no_op",
+      "structured_adjustment": null,
+      "explanation": "This note does not affect today's 24-hour energy schedule."
+    }
+  ],
+  "SAMPLE-02": [
+    {
+      "note_index": 0,
+      "applies": true,
+      "directive_type": "no_charge_window",
+      "structured_adjustment": {
+        "hours": [
+          2,
+          3,
+          4
+        ]
+      },
+      "explanation": "Battery charging is unavailable during maintenance."
+    }
+  ],
+  "SAMPLE-03": [
+    {
+      "note_index": 0,
+      "applies": true,
+      "directive_type": "minimum_battery_reserve",
+      "structured_adjustment": {
+        "hours": [
+          18,
+          19,
+          20
+        ],
+        "minimum_energy_kwh": 100
+      },
+      "explanation": "Half of the 200 kWh battery is 100 kWh, which must remain available during the stated window."
+    }
+  ],
+  "SAMPLE-04": [
+    {
+      "note_index": 0,
+      "applies": true,
+      "directive_type": "no_discharge_window",
+      "structured_adjustment": {
+        "hours": [
+          18,
+          19
+        ]
+      },
+      "explanation": "Battery discharge is disabled during the protection-test window."
+    }
+  ],
+  "SAMPLE-05": [
+    {
+      "note_index": 0,
+      "applies": true,
+      "directive_type": "max_grid_window",
+      "structured_adjustment": {
+        "hours": [
+          18,
+          19,
+          20
+        ],
+        "max_grid_kwh": 155
+      },
+      "explanation": "Grid import is capped at 155 kWh for each hour in the feeder-restriction window."
+    }
+  ],
+  "SAMPLE-06": [
+    {
+      "note_index": 0,
+      "applies": true,
+      "directive_type": "solar_reduction",
+      "structured_adjustment": {
+        "hours": [
+          10,
+          11
+        ],
+        "factor": 0.5
+      },
+      "explanation": "Usable solar is reduced to 50% during the stated inspection window."
+    },
+    {
+      "note_index": 1,
+      "applies": true,
+      "directive_type": "no_charge_window",
+      "structured_adjustment": {
+        "hours": [
+          14,
+          15
+        ]
+      },
+      "explanation": "Battery charging is unavailable during the charging-circuit outage."
+    },
+    {
+      "note_index": 2,
+      "applies": false,
+      "directive_type": "no_op",
+      "structured_adjustment": null,
+      "explanation": "This note does not affect today's energy schedule."
+    }
+  ],
+  "SAMPLE-07": [
+    {
+      "note_index": 0,
+      "applies": true,
+      "directive_type": "minimum_battery_reserve",
+      "structured_adjustment": {
+        "hours": [
+          18,
+          19,
+          20,
+          21
+        ],
+        "minimum_energy_kwh": 90
+      },
+      "explanation": "A 90 kWh emergency reserve is required for the full stated window."
+    },
+    {
+      "note_index": 1,
+      "applies": true,
+      "directive_type": "max_grid_window",
+      "structured_adjustment": {
+        "hours": [
+          19,
+          20
+        ],
+        "max_grid_kwh": 180
+      },
+      "explanation": "Grid import is capped at 180 kWh in the transformer-limit window."
+    }
+  ],
+  "SAMPLE-08": [
+    {
+      "note_index": 0,
+      "applies": true,
+      "directive_type": "no_charge_window",
+      "structured_adjustment": {
+        "hours": [
+          11,
+          12
+        ]
+      },
+      "explanation": "Battery charging is disabled during charger inspection."
+    },
+    {
+      "note_index": 1,
+      "applies": true,
+      "directive_type": "no_discharge_window",
+      "structured_adjustment": {
+        "hours": [
+          17,
+          18
+        ]
+      },
+      "explanation": "Battery discharge is disabled during relay testing."
+    }
+  ],
+  "SAMPLE-09": [
+    {
+      "note_index": 0,
+      "applies": true,
+      "directive_type": "solar_reduction",
+      "structured_adjustment": {
+        "hours": [
+          11,
+          12,
+          13
+        ],
+        "factor": 0.2
+      },
+      "explanation": "An 80% reduction leaves 20% usable solar during the stated hours."
+    },
+    {
+      "note_index": 1,
+      "applies": false,
+      "directive_type": "no_op",
+      "structured_adjustment": null,
+      "explanation": "This note does not affect today's energy schedule."
+    }
+  ],
+  "SAMPLE-10": [
+    {
+      "note_index": 0,
+      "applies": true,
+      "directive_type": "minimum_battery_reserve",
+      "structured_adjustment": {
+        "hours": [
+          18,
+          19,
+          20,
+          21
+        ],
+        "minimum_energy_kwh": 80
+      },
+      "explanation": "An 80 kWh reserve is required during the data-center backup window."
+    },
+    {
+      "note_index": 1,
+      "applies": true,
+      "directive_type": "max_grid_window",
+      "structured_adjustment": {
+        "hours": [
+          19,
+          20,
+          21
+        ],
+        "max_grid_kwh": 190
+      },
+      "explanation": "Grid import is capped at 190 kWh during the substation constraint."
+    },
+    {
+      "note_index": 2,
+      "applies": false,
+      "directive_type": "no_op",
+      "structured_adjustment": null,
+      "explanation": "This note does not affect today's energy schedule."
+    }
+  ]
+}

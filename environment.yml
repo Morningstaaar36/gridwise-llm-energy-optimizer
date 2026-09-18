@@ -1,0 +1,15 @@
+# Cross-platform conda environment for GridWise.
+# Verified target platforms: linux-64 (Siyam), osx-arm64 + osx-64 (Daddy).
+# Only compiled/native packages live here; everything pure-Python comes from
+# requirements.txt so the exact same list can be reused inside the Docker image.
+name: gridwise
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip>=24.0
+  # native / BLAS-linked — let conda-forge pick the right wheel per platform
+  - numpy>=2.0,<3.0
+  - scipy>=1.14,<2.0    # provides HiGHS through scipy.optimize.linprog
+  - pip:
+      - -r requirements.txt

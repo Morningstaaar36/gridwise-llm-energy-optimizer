@@ -1,0 +1,26 @@
+# Runtime + dev dependencies. Installed by conda (via environment.yml) AND by
+# the Docker image, so it must stay platform-neutral: no CUDA, no vllm here.
+# After `make setup` succeeds on BOTH machines, run `make lock` once and commit
+# requirements.lock.txt — that file is what the Docker image and the judges use.
+
+# --- web service -------------------------------------------------------------
+fastapi>=0.115,<1.0
+uvicorn[standard]>=0.32,<1.0
+pydantic>=2.9,<3.0
+pydantic-settings>=2.6,<3.0
+orjson>=3.10,<4.0
+
+# --- model access (OpenAI-compatible protocol covers hosted APIs AND Ollama) --
+openai>=1.54,<2.0
+httpx>=0.27,<1.0
+tenacity>=9.0,<10.0
+
+# --- numerics (pinned in environment.yml for conda; repeated for pip/Docker) --
+numpy>=2.0,<3.0
+scipy>=1.14,<2.0
+
+# --- dev / test --------------------------------------------------------------
+pytest>=8.3,<9.0
+pytest-asyncio>=0.24,<1.0
+jsonschema>=4.23,<5.0
+ruff>=0.7,<1.0

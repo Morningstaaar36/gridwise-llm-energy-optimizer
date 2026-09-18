@@ -3,8 +3,10 @@ import json, copy, itertools
 import numpy as np
 from verify_lp import compile_constraints, solve, replay, H
 from hedging_premium import meet, perturb
+import pathlib
+_PACK = pathlib.Path(__file__).resolve().parent.parent / "fixtures" / "public_cases.json"
 
-pack = json.load(open("/home/lucifer/Documents/bup/BUP_CSE_FEST_2026_Participant_Docs/BUP_CSE_FEST_2026_Preli_Public_Sample_Cases.json"))
+pack = json.loads(_PACK.read_text())
 
 def plan_from(res):
     g, s, b, e = (res.x[i*H:(i+1)*H] for i in range(4))

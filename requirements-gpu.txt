@@ -1,0 +1,12 @@
+# LINUX + NVIDIA ONLY. Siyam's RTX 5060 Ti (Blackwell, sm_120) needs CUDA 12.8+.
+# Daddy MUST NOT install this file — macOS has no CUDA and the install will fail.
+#
+# This is OPTIONAL. The default local-model path is Ollama, which is installed
+# outside pip (see README) and needs nothing from this file. Only use vLLM if
+# Ollama's latency is measured to be too high.
+#
+#   pip install -r requirements-gpu.txt --extra-index-url https://download.pytorch.org/whl/cu128
+#
+torch>=2.7          # cu128 wheels — required for sm_120 / Blackwell
+vllm>=0.8
+xgrammar>=0.1.11    # grammar-constrained decoding backend for vLLM

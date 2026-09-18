@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "gridwise/response.schema.json",
+  "title": "POST /optimize-energy 200 response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["scenario_id", "directive_interpretation", "hourly_plan",
+               "total_grid_kwh", "total_cost_bdt", "peak_grid_kwh", "plan_summary"],
+  "properties": {
+    "scenario_id": { "type": "string" },
+    "directive_interpretation": {
+      "type": "array", "minItems": 1, "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["note_index", "applies", "directive_type", "structured_adjustment", "explanation"],
+        "properties": {
+          "note_index": { "type": "integer", "minimum": 0, "maximum": 2 },
+          "applies":    { "type": "boolean" },
+          "directive_type": {
+            "type": "string",
+            "enum": ["solar_reduction", "minimum_battery_reserve", "no_charge_window",
+                     "no_discharge_window", "max_grid_window", "no_op"]
+          },
+          "structured_adjustment": { "type": ["object", "null"] },
+          "explanation": { "type": "string" }
+        }
+      }
+    },
+    "hourly_plan": {
+      "type": "array", "minItems": 24, "maxItems": 24,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["hour", "grid_kwh", "solar_used_kwh", "battery_action",
+                     "battery_kwh", "battery_energy_after_kwh"],
+        "properties": {
+          "hour":            { "type": "integer", "minimum": 0, "maximum": 23 },
+          "grid_kwh":        { "type": "number", "minimum": 0 },
+          "solar_used_kwh":  { "type": "number", "minimum": 0 },
+          "battery_action":  { "type": "string", "enum": ["charge", "discharge", "idle"] },
+          "battery_kwh":     { "type": "number", "minimum": 0 },
+          "battery_energy_after_kwh": { "type": "number", "minimum": 0 }
+        }
+      }
+    },
+    "total_grid_kwh": { "type": "number", "minimum": 0 },
+    "total_cost_bdt": { "type": "number" },
+    "peak_grid_kwh":  { "type": "number", "minimum": 0 },
+    "plan_summary":   { "type": "string", "minLength": 1 }
+  }
+}
