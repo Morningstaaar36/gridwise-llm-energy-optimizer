@@ -1,0 +1,15 @@
+# evals/hedging_report.py
+# generated: 2026-09-18T15:51:09Z
+# command: (cd evals && python hedging_report.py)
+
+case       |S| used    nominal    shipped   prem%  valid-under-GT
+SAMPLE-01    4    4   38365.00   39730.00  3.558%  PASS
+SAMPLE-02    3    3   42885.00   42960.00  0.175%  PASS
+SAMPLE-03    4    4   35480.00   35980.00  1.409%  PASS
+SAMPLE-04    3    3   40495.00   41285.00  1.951%  PASS
+SAMPLE-05    4    3   33950.00   34030.00  0.236%  PASS
+SAMPLE-06    4    4   34090.00   35740.00  4.840%  PASS
+SAMPLE-07    4    4   38550.00   38712.00  0.420%  PASS
+SAMPLE-08    4    4   37665.00   38415.00  1.991%  PASS
+SAMPLE-09    4    4   34873.00   36849.00  5.666%  PASS
+SAMPLE-10    4    4   41620.00   41787.00  0.401%  PASS

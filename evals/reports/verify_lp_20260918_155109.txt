@@ -1,0 +1,17 @@
+# evals/verify_lp.py
+# generated: 2026-09-18T15:51:09Z
+# command: python evals/verify_lp.py
+
+case         ref cost    LP cost     delta  replay
+SAMPLE-01    38365.00   38365.00    0.0000  OK
+SAMPLE-02    42885.00   42885.00    0.0000  OK
+SAMPLE-03    35480.00   35480.00    0.0000  OK
+SAMPLE-04    40495.00   40495.00    0.0000  OK
+SAMPLE-05    33950.00   33950.00    0.0000  OK
+SAMPLE-06    34090.00   34090.00    0.0000  OK
+SAMPLE-07    38550.00   38550.00    0.0000  OK
+SAMPLE-08    37665.00   37665.00    0.0000  OK
+SAMPLE-09    34873.00   34873.00    0.0000  OK
+SAMPLE-10    41620.00   41620.00    0.0000  OK
+
+10/10 cases: LP optimum == published reference cost AND reference plan replays clean
