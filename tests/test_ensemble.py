@@ -218,3 +218,48 @@ async def test_provider_outage_never_becomes_all_no_op():
     with pytest.raises(GridWiseError) as excinfo:
         await interpret_notes(REQUEST, settings(), provider, RequestTrace())
     assert excinfo.value.category is ErrorCategory.provider_failure
+
+
+# --- n>1 capability detection (provider.py) ----------------------------------
+#
+# A 429 rate limit was once misclassified as "n unsupported" because the check
+# was `"n" not in str(exc).lower()` -- true for almost every English sentence.
+# That silently converted a rate-limited endpoint into K times the request
+# volume. These pin the fix to the real openai.* exception types.
+
+
+def test_gemini_candidates_rejection_is_recognised_as_n_unsupported():
+    import httpx
+    from openai import BadRequestError
+
+    from app.interpretation.provider import _is_unsupported_n
+
+    msg = "Multiple candidates is not enabled for this model"
+    resp = httpx.Response(400, request=httpx.Request("POST", "http://x"), json={"error": {"message": msg}})
+    exc = BadRequestError(msg, response=resp, body={"error": {"message": msg}})
+    assert _is_unsupported_n(exc) is True
+
+
+def test_rate_limit_error_is_never_misread_as_n_unsupported():
+    """The regression this test exists for: a 429 must propagate, not fan out."""
+    import httpx
+    from openai import RateLimitError
+
+    from app.interpretation.provider import _is_unsupported_n
+
+    msg = "Rate limit reached for model on tokens per minute (TPM)"
+    resp = httpx.Response(429, request=httpx.Request("POST", "http://x"), json={"error": {"message": msg}})
+    exc = RateLimitError(msg, response=resp, body={"error": {"message": msg}})
+    assert _is_unsupported_n(exc) is False
+
+
+def test_unrelated_bad_request_is_not_misread_as_n_unsupported():
+    import httpx
+    from openai import BadRequestError
+
+    from app.interpretation.provider import _is_unsupported_n
+
+    msg = "invalid api key provided"
+    resp = httpx.Response(400, request=httpx.Request("POST", "http://x"), json={"error": {"message": msg}})
+    exc = BadRequestError(msg, response=resp, body={"error": {"message": msg}})
+    assert _is_unsupported_n(exc) is False

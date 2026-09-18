@@ -24,7 +24,7 @@ from __future__ import annotations
 import asyncio
 from dataclasses import dataclass
 
-from openai import AsyncOpenAI
+from openai import AsyncOpenAI, BadRequestError
 
 from app.config import Settings
 from app.contracts import ErrorCategory, GridWiseError
@@ -34,6 +34,19 @@ from app.observability import get_logger, redact
 logger = get_logger(__name__)
 
 _MAX_CONCURRENT_FANOUT = 8
+
+# Phrases observed from real endpoints when n>1 is rejected outright (a client
+# error, distinct from a rate limit or outage): Gemini's "Multiple candidates
+# is not enabled for this model", OpenAI/Groq's "'n' is not supported", etc.
+# Matched only against BadRequestError so a 429/5xx/timeout never lands here.
+_N_UNSUPPORTED_HINTS = ("candidate", "'n'", "param 'n'", "not enabled", "not supported")
+
+
+def _is_unsupported_n(exc: Exception) -> bool:
+    if not isinstance(exc, BadRequestError):
+        return False
+    message = str(exc).lower()
+    return any(hint in message for hint in _N_UNSUPPORTED_HINTS)
 
 
 @dataclass
@@ -154,10 +167,14 @@ class LLMProvider:
                 # Honoured the call but ignored n: treat as unsupported.
                 self._supports_n[endpoint.label] = False
             except Exception as exc:
-                if "n" not in str(exc).lower():
+                if not _is_unsupported_n(exc):
+                    # A rate limit, timeout, or auth failure must propagate as
+                    # a real failure. Reinterpreting it as "n unsupported" would
+                    # fan out into K calls against an endpoint that is already
+                    # failing — the opposite of what a 429 needs.
                     raise
                 self._supports_n[endpoint.label] = False
-                logger.info("endpoint=%s n>1 unsupported, fanning out", endpoint.label)
+                logger.info("endpoint=%s n>1 unsupported (%s), fanning out", endpoint.label, redact(exc))
 
         semaphore = asyncio.Semaphore(min(n, _MAX_CONCURRENT_FANOUT))
 
