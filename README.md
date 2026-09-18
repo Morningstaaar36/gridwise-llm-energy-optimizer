@@ -18,6 +18,189 @@ Documentation & Local Reproducibility is worth 10 points. Until then it is setup
 
 ---
 
+# For judges
+
+## What this is
+
+GridWise is a small FastAPI service for the BUP CSE Fest 2026 GridWise-LLM preliminary. It takes
+a 24-hour demand/solar/tariff forecast, a battery spec, and 1–3 free-text operator notes, and
+returns the cheapest valid 24-hour grid/solar/battery schedule that honours every note. A language
+model interprets the notes into one of six structured directive types; everything downstream —
+validation, constraint compilation, optimization, and verification — is deterministic.
+
+## Public base URL
+
+<!-- TODO(Gate 6/7): fill in once Siyam's Azure Container Apps deployment is live. -->
+**`https://<TODO-fill-in-fqdn>`** — `GET /health`, `POST /optimize-energy`.
+
+## Local quickstart (judges: run this on a clean machine)
+
+```bash
+git clone <REPO_URL> gridwise-llm-energy-optimizer
+cd gridwise-llm-energy-optimizer
+
+conda env create -f environment.yml
+conda activate gridwise
+
+cp .env.example .env
+# edit .env: set LLM_BASE_URL, LLM_API_KEY, LLM_MODEL (see the table below for names)
+
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+
+In a second terminal:
+
+```bash
+curl -fsS http://localhost:8000/health
+# {"status":"ok"}
+
+curl -s -X POST http://localhost:8000/optimize-energy \
+  -H "Content-Type: application/json" \
+  -d "$(jq '.cases[0].input' fixtures/public_cases.json)" | jq
+# a full EnergyResponse: scenario_id, directive_interpretation, hourly_plan, totals, plan_summary
+```
+
+## Required environment variables
+
+Names only — real values go in your own `.env`, never here or in any commit.
+
+| Variable | Purpose |
+|---|---|
+| `LLM_BASE_URL` | Primary model's OpenAI-compatible base URL |
+| `LLM_API_KEY` | Primary model's API key |
+| `LLM_MODEL` | Primary model id |
+| `LLM_FALLBACK_BASE_URL` | Fallback model's base URL (must still be a language model — never blank in production) |
+| `LLM_FALLBACK_API_KEY` | Fallback model's API key |
+| `LLM_FALLBACK_MODEL` | Fallback model id |
+| `LLM_SAMPLES` | K samples requested per interpretation call (K=1 disables the ensemble hedge) |
+| `LLM_TEMPERATURE` | Sampling temperature (ensemble diversity only) |
+| `LLM_TIMEOUT_SECONDS` | Per-attempt provider timeout |
+| `LLM_MAX_ATTEMPTS` | Batched call + repair rounds, combined |
+| `LLM_MAX_COMPLETION_TOKENS` | Cap on the structured-output response |
+| `REQUEST_DEADLINE_SECONDS` | Hard ceiling for the whole request (judge times out at 30s) |
+| `HEDGE_ENABLED` | `false` degrades to the single-interpretation pipeline |
+| `HEDGE_MAX_CANDIDATES` | Cap on the meet-semilattice subset scan |
+| `HEDGE_ALPHA` | Reserved for a calibrated plausible-set cutoff — see *Known limitations* |
+| `PORT` | Service port |
+| `LOG_LEVEL` | Log verbosity |
+
+## Model provider and id
+
+Benchmarked and deployed with:
+
+- **Primary**: `gemini-flash-lite-latest` via Google's OpenAI-compatible endpoint
+  (`https://generativelanguage.googleapis.com/v1beta/openai`)
+- **Fallback**: `openai/gpt-oss-120b` via Groq (`https://api.groq.com/openai/v1`)
+
+One adapter (`app/interpretation/provider.py`) speaks the OpenAI chat-completions protocol to
+both, plus Ollama for offline development — no provider-specific code anywhere.
+
+## The LLM's role, and why regex alone would not qualify
+
+The model reads 1–3 operator notes and emits one structured directive per note (or `no_op`).
+This is a semantic task, not a pattern-matching one: "reduced *by* 80%" and "reduced *to* 80%"
+share every keyword but mean opposite things (`factor` 0.2 vs 0.8); "keep 50% in reserve" needs
+the battery's capacity to resolve to an absolute kWh; a note can use energy vocabulary while being
+completely irrelevant to today's schedule. A regex/keyword layer cannot represent the ambiguity a
+paraphrase introduces, has no notion of *confidence*, and cannot be measured for paraphrase
+robustness — which the rubric scores directly. GridWise instead samples `LLM_SAMPLES` structured
+interpretations in one batched call, clusters them by **exact compiled-tensor equality** (CS³,
+`app/energy/canonical.py`), and reports the majority reading while scheduling against the meet of
+every reading worth defending (`app/energy/selection.py`) — see *The CLAMP hedge* below and
+`docs/ARCHITECTURE_CLAMP.md`.
+
+## The guardrails
+
+`app/interpretation/guardrails.py` treats every model output as untrusted until it passes
+deterministic checks: one directive per note, in order, each exactly once; `directive_type` in the
+supported six; `no_op` ⇒ `applies=false` and a null adjustment, every other type ⇒ `applies=true`
+and the matching shape with no extra fields; hours unique integers 0–23 (sorted if merely
+unordered, rejected if duplicated or out of range); numeric fields finite and in range; booleans
+never accepted where a number is expected. **A rejected value is never repaired by guessing** — it
+triggers one bounded repair round with the original notes and the validation errors, then a
+controlled `invalid_interpretation` error. Violation messages name note indexes only; note text
+never reaches a log line or an error body.
+
+## The optimizer and solver
+
+`app/energy/compiler.py` turns accepted directives into five 24-hour bound arrays (solar ceiling,
+reserve floor, charge/discharge ceilings, grid ceiling). `app/energy/optimizer.py` solves a
+96-variable signed-flow linear program — `g`, `s`, `b` (signed: + charges, − discharges), `e` per
+hour — with `scipy.optimize.linprog(method="highs")`. This formulation is an exact fit for a
+lossless battery: every allowed action maps to one signed number, so simultaneous charge/discharge
+is structurally impossible and no integer variables are needed.
+
+**Verified exact**: `evals/reports/verify_lp_20260918_155109.txt` — the LP optimum matches all ten
+published reference costs to **0.0000 BDT**, and every published reference schedule replays clean
+under independent arithmetic.
+
+## The CLAMP hedge
+
+Two things are scored separately: the interpretation you *report*, and the schedule you *ship*
+(replayed against the judge's hidden ground truth). GridWise reports the ensemble's majority
+reading but schedules against the elementwise **meet** of every reading whose posterior is worth
+defending — a schedule feasible under the meet satisfies every one of those readings at once
+(`docs/ARCHITECTURE_CLAMP.md` §3.2, the Meet Theorem). This costs a small premium only when the
+ensemble actually disagrees; when it agrees, the premium is exactly zero.
+
+**Measured** (`evals/reports/hedging_report_20260918_155109.txt`, worst-case synthetic
+disagreement on all ten public cases): mean premium **2.07%**, max **5.67%** — about 0.2 of the
+10 optimization points, spent to protect the 25-point interpretation category and the 25-point
+constraint-correctness category from a single wrong reading. One case (SAMPLE-05) hit an
+infeasible full meet; monotone-infeasibility pruning dropped it to 3 of 4 candidates rather than
+failing outright.
+
+## Docker
+
+<!-- TODO(Gate 6/7): fill in the exact digest once Siyam pushes the image. -->
+```bash
+docker pull ghcr.io/<TODO>/gridwise@sha256:<TODO-exact-digest>
+docker run --rm -p 8000:8000 --env-file .env ghcr.io/<TODO>/gridwise@sha256:<TODO-exact-digest>
+curl -fsS http://localhost:8000/health
+```
+
+## Credited dependencies
+
+FastAPI + Uvicorn (service), Pydantic v2 / pydantic-settings (strict request/response validation
+and config), SciPy (HiGHS solver, via `scipy.optimize.linprog`), NumPy, the `openai` Python SDK
+(protocol client — works against OpenAI, Groq, Gemini's OpenAI-compatible endpoint, and Ollama
+with zero provider-specific code), httpx, tenacity, pytest / pytest-asyncio, ruff. Development
+model access: Google Gemini, Groq, and locally-served Ollama (`qwen3:8b`) as an offline fallback.
+
+## Known limitations
+
+- **Overlapping `solar_reduction` composition is an interim assumption.** The problem statement
+  doesn't define how two solar-reduction directives on the same hour combine; GridWise defaults to
+  the *product* of their factors — the tightest reading, and provably safe under any looser
+  reading since unused solar may always be curtailed for free (`docs/ARCHITECTURE_CLAMP.md` §2).
+- **`HEDGE_ALPHA` is reserved, not wired up.** The design notes describe a split-conformal
+  plausible-set cutoff; the shipped selector instead does full bounded subset enumeration
+  (`HEDGE_MAX_CANDIDATES`) with monotone-infeasibility pruning and expected-score selection. Both
+  approaches ship a valid schedule; the conformal cutoff would only change *which* candidates are
+  considered, and its coverage guarantee would not transfer to unseen hidden notes regardless
+  (`docs/ARCHITECTURE_CLAMP.md` §3.4, §9).
+- **The measured hedge premium is a worst-case bound**, built from synthetic maximal disagreement.
+  In service the premium is zero whenever the K-sample ensemble agrees, which is the common case.
+- **Free-tier provider quota is shared and finite.** Sustained testing during development
+  triggered real 429s on both the primary and fallback provider; the service always degraded to a
+  controlled `provider_failure` 500 rather than fabricating a plan, but a judge hitting the
+  deployed endpoint during a quota-exhausted window would see a 500. The deployed judge-facing key
+  should carry adequate quota headroom for a single ten-case run plus normal probing.
+- **The ε-slack-maximal re-solve and dual-attribution summary are best-effort refinements.** If
+  either is disabled, the service still returns a fully valid, replay-verified schedule — just
+  without the extra numeric margin or the per-note marginal-cost breakdown in `plan_summary`.
+
+## Secret-handling policy
+
+`.env` is git-ignored and must never be committed, pasted into an issue, a prompt, a log line, or
+an API response. `Settings.describe()` (`app/config.py`) reports only whether a key is *present*,
+never its value, and that is all that reaches the startup log. Every `GridWiseError` message is
+operator-safe: no stack trace, no key, no raw provider response body. The Docker image is built
+with no baked-in secrets; credentials are supplied at container-run / Container-Apps-secret time
+only.
+
+---
+
 ## 0. Who is on what
 
 | | Machine | Handle | Branch |
