@@ -185,15 +185,15 @@ Public image, pullable with no credentials:
 
 ```
 ghcr.io/morningstaaar36/gridwise:v1.0
-digest: sha256:8dd07e67fb218541ad6cb00f0dc549dacd952f573d9d9e8600ae6ae9b5cfd1eb
+digest: sha256:71da3c80494b4b5567e3a6f007c1b4238688d489ea0208e7391cb75c9412c90a
 port:   8000  (honours $PORT; binds 0.0.0.0; runs as non-root uid 10001)
 ```
 
 ```bash
 # by digest (exact, immutable)
-docker pull ghcr.io/morningstaaar36/gridwise@sha256:8dd07e67fb218541ad6cb00f0dc549dacd952f573d9d9e8600ae6ae9b5cfd1eb
+docker pull ghcr.io/morningstaaar36/gridwise@sha256:71da3c80494b4b5567e3a6f007c1b4238688d489ea0208e7391cb75c9412c90a
 docker run --rm -p 8000:8000 --env-file .env \
-  ghcr.io/morningstaaar36/gridwise@sha256:8dd07e67fb218541ad6cb00f0dc549dacd952f573d9d9e8600ae6ae9b5cfd1eb
+  ghcr.io/morningstaaar36/gridwise@sha256:71da3c80494b4b5567e3a6f007c1b4238688d489ea0208e7391cb75c9412c90a
 curl -fsS http://localhost:8000/health
 ```
 

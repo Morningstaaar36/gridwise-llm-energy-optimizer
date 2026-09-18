@@ -110,9 +110,9 @@ endpoint during rehearsal before the real take.)*
 > locally."
 
 ```bash
-docker pull ghcr.io/morningstaaar36/gridwise@sha256:8dd07e67fb218541ad6cb00f0dc549dacd952f573d9d9e8600ae6ae9b5cfd1eb
+docker pull ghcr.io/morningstaaar36/gridwise@sha256:71da3c80494b4b5567e3a6f007c1b4238688d489ea0208e7391cb75c9412c90a
 docker run --rm -p 8000:8000 --env-file .env \
-  ghcr.io/morningstaaar36/gridwise@sha256:8dd07e67fb218541ad6cb00f0dc549dacd952f573d9d9e8600ae6ae9b5cfd1eb
+  ghcr.io/morningstaaar36/gridwise@sha256:71da3c80494b4b5567e3a6f007c1b4238688d489ea0208e7391cb75c9412c90a
 ```
 
 **Close:** "Full setup and every number quoted here are in the README and `evals/reports/`."

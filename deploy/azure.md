@@ -1,7 +1,7 @@
 # GridWise — Azure Container Apps deployment
 
 Deploys the exact image published in Gate 6 (`ghcr.io/morningstaaar36/gridwise:v1.0`,
-digest `sha256:8dd07e67fb218541ad6cb00f0dc549dacd952f573d9d9e8600ae6ae9b5cfd1eb`) so the
+digest `sha256:71da3c80494b4b5567e3a6f007c1b4238688d489ea0208e7391cb75c9412c90a`) so the
 registry artifact and the live endpoint are provably the same build.
 
 ## Live endpoint
