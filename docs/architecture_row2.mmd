@@ -1,0 +1,6 @@
+flowchart LR
+    F["directives (from row 1) to constraint tensor via Compiler"] --> G["Meet-hedge: subset scan, prune, expected-score select"]
+    G --> H["LP solver — HiGHS"]
+    H --> I["Independent replay — raw request only"]
+    I -->|pass| J["200: plan + summary"]
+    I -->|fail| K["Controlled error"]

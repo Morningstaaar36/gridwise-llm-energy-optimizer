@@ -20,10 +20,13 @@ Record on Linux (Siyam), screen-captured against the **live Azure endpoint**, no
 
 ## 0:25–1:15 — Architecture
 
-**Show:** `docs/architecture_flow.png` — a single-row flowchart of the actual shipped pipeline
-(rendered from `docs/architecture_flow.mmd`; re-render with `npx @mermaid-js/mermaid-cli` if it
-ever needs updating). It's wider than 16:9, so letterbox it (black bars top/bottom) rather than
-stretching it. Do **not** use the more detailed flowchart in `docs/ARCHITECTURE_CLAMP.md` §3.8 —
+**Show:** `docs/architecture_flow.png` — a two-row flowchart of the actual shipped pipeline (top:
+Interpretation, notes → LLM ensemble → guardrails → CS3 → report argmax; bottom: Energy &
+Verification, compiler → meet-hedge → LP → replay → response). Source is
+`docs/architecture_row1.mmd` / `architecture_row2.mmd`; regenerate with
+`python docs/render_architecture_diagram.py` (needs `pip install pillow` once) if the pipeline
+ever changes. It's a landscape ~3.4:1 image, a bit wider than 16:9 — letterbox it rather than
+stretching. Do **not** use the more detailed flowchart in `docs/ARCHITECTURE_CLAMP.md` §3.8 —
 that one shows a calibrated plausible-set step (`S_alpha` / `HEDGE_ALPHA`) that was never actually
 wired into `app/energy/selection.py`; see `README.md`'s *Known limitations* section.
 
