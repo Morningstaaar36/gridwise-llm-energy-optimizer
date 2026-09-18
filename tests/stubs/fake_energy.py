@@ -13,8 +13,8 @@ import pathlib
 
 from app.contracts import (
     EnergyRequest,
-    ErrorCategory,
     EnergyResponse,
+    ErrorCategory,
     GridWiseError,
     InterpretationSample,
     VerificationReport,

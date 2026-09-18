@@ -157,7 +157,9 @@ def validate(request: EnergyRequest, raw: Any) -> list[Directive]:
     except ValidationError as exc:
         first = exc.errors()[0]
         location = ".".join(str(part) for part in first.get("loc", ()) if part != "function-after")
-        raise _reject(f"invalid directive at {location or 'root'}: {first.get('msg', 'schema error')}")
+        raise _reject(
+            f"invalid directive at {location or 'root'}: {first.get('msg', 'schema error')}"
+        ) from exc
 
     _check_note_mapping(directives, expected)
     _check_against_battery(request, directives)

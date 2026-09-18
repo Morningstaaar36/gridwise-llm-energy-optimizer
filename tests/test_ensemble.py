@@ -11,7 +11,6 @@ import json
 import pathlib
 
 import pytest
-
 from pydantic import ValidationError
 
 from app.config import Settings
@@ -228,38 +227,42 @@ async def test_provider_outage_never_becomes_all_no_op():
 # volume. These pin the fix to the real openai.* exception types.
 
 
-def test_gemini_candidates_rejection_is_recognised_as_n_unsupported():
+def _fake_openai_error(cls, status: int, message: str):
+    """Build a real openai.* exception with the fields _is_unsupported_n reads."""
     import httpx
+
+    body = {"error": {"message": message}}
+    response = httpx.Response(status, request=httpx.Request("POST", "http://x"), json=body)
+    return cls(message, response=response, body=body)
+
+
+def test_gemini_candidates_rejection_is_recognised_as_n_unsupported():
     from openai import BadRequestError
 
     from app.interpretation.provider import _is_unsupported_n
 
-    msg = "Multiple candidates is not enabled for this model"
-    resp = httpx.Response(400, request=httpx.Request("POST", "http://x"), json={"error": {"message": msg}})
-    exc = BadRequestError(msg, response=resp, body={"error": {"message": msg}})
+    exc = _fake_openai_error(
+        BadRequestError, 400, "Multiple candidates is not enabled for this model"
+    )
     assert _is_unsupported_n(exc) is True
 
 
 def test_rate_limit_error_is_never_misread_as_n_unsupported():
     """The regression this test exists for: a 429 must propagate, not fan out."""
-    import httpx
     from openai import RateLimitError
 
     from app.interpretation.provider import _is_unsupported_n
 
-    msg = "Rate limit reached for model on tokens per minute (TPM)"
-    resp = httpx.Response(429, request=httpx.Request("POST", "http://x"), json={"error": {"message": msg}})
-    exc = RateLimitError(msg, response=resp, body={"error": {"message": msg}})
+    exc = _fake_openai_error(
+        RateLimitError, 429, "Rate limit reached for model on tokens per minute (TPM)"
+    )
     assert _is_unsupported_n(exc) is False
 
 
 def test_unrelated_bad_request_is_not_misread_as_n_unsupported():
-    import httpx
     from openai import BadRequestError
 
     from app.interpretation.provider import _is_unsupported_n
 
-    msg = "invalid api key provided"
-    resp = httpx.Response(400, request=httpx.Request("POST", "http://x"), json={"error": {"message": msg}})
-    exc = BadRequestError(msg, response=resp, body={"error": {"message": msg}})
+    exc = _fake_openai_error(BadRequestError, 400, "invalid api key provided")
     assert _is_unsupported_n(exc) is False

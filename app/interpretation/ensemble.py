@@ -113,7 +113,7 @@ async def interpret_notes(
             result = await asyncio.wait_for(
                 provider.complete(prompt, settings.llm_samples), timeout=remaining
             )
-        except asyncio.TimeoutError:
+        except TimeoutError:
             raise GridWiseError(
                 ErrorCategory.deadline_exceeded, "request deadline reached waiting for the model"
             ) from None

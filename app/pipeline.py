@@ -22,6 +22,7 @@ from app.observability import RequestTrace, get_logger
 #     from app.energy.selection import plan_energy
 # and `grep -rn "tests.stubs" app/` must return nothing.
 from tests.stubs.fake_energy import plan_energy  # noqa: E402
+
 # -----------------------------------------------------------------------------
 
 logger = get_logger(__name__)
@@ -37,7 +38,9 @@ async def run(
         samples = await interpret_notes(request, settings, provider, trace, deadline)
 
     if time.monotonic() >= deadline:
-        raise GridWiseError(ErrorCategory.deadline_exceeded, "request deadline reached before scheduling")
+        raise GridWiseError(
+            ErrorCategory.deadline_exceeded, "request deadline reached before scheduling"
+        )
 
     # The solver is synchronous and CPU-bound; keep it off the event loop so
     # concurrent requests are not serialised behind it.
@@ -46,7 +49,9 @@ async def run(
 
     if not report.ok:
         logger.error("replay rejected plan: %d violation(s)", len(report.violations))
-        raise GridWiseError(ErrorCategory.replay_failure, "internal verification rejected the schedule")
+        raise GridWiseError(
+            ErrorCategory.replay_failure, "internal verification rejected the schedule"
+        )
 
     logger.info("completed %s", trace.as_dict())
     return response, trace

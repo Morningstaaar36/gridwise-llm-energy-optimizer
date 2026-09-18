@@ -16,7 +16,10 @@ from app.observability import RequestTrace, redact
 @pytest.mark.parametrize(
     "text, leaked",
     [
-        ("Incorrect API key provided: gsk_O3gW****************3mBf. See docs.", ["gsk_O3gW", "3mBf"]),
+        (
+            "Incorrect API key provided: gsk_O3gW****************3mBf. See docs.",
+            ["gsk_O3gW", "3mBf"],
+        ),
         ("Authorization: Bearer gsk_livekeymaterial1234567890", ["gsk_live", "1234567890"]),
         ("api_key=sk-proj-abcdefghijklmnopqrst", ["sk-proj", "abcdefghij"]),
         ("token: AIzaSyD_ExampleLooking_Key_000111222", ["AIzaSyD"]),

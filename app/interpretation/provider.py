@@ -154,7 +154,9 @@ class LLMProvider:
 
         return [choice.message.content or "" for choice in response.choices]
 
-    async def _sample_endpoint(self, endpoint: Endpoint, prompt: RenderedPrompt, n: int) -> ProviderResult:
+    async def _sample_endpoint(
+        self, endpoint: Endpoint, prompt: RenderedPrompt, n: int
+    ) -> ProviderResult:
         if n == 1:
             return ProviderResult(await self._one_call(endpoint, prompt, 1), endpoint.model, 1)
 
@@ -174,7 +176,9 @@ class LLMProvider:
                     # failing — the opposite of what a 429 needs.
                     raise
                 self._supports_n[endpoint.label] = False
-                logger.info("endpoint=%s n>1 unsupported (%s), fanning out", endpoint.label, redact(exc))
+                logger.info(
+                    "endpoint=%s n>1 unsupported (%s), fanning out", endpoint.label, redact(exc)
+                )
 
         semaphore = asyncio.Semaphore(min(n, _MAX_CONCURRENT_FANOUT))
 
@@ -201,7 +205,7 @@ class LLMProvider:
                 if result.texts:
                     return result
                 errors.append(f"{endpoint.label}: empty response")
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 errors.append(f"{endpoint.label}: timeout")
                 logger.warning("endpoint=%s timed out", endpoint.label)
             except Exception as exc:

@@ -11,9 +11,9 @@ from __future__ import annotations
 import logging
 import re
 import time
+from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass, field
-from typing import Iterator
 
 _SECRET_PATTERNS = [
     # Credential prefixes: consume to the next delimiter so that a provider's

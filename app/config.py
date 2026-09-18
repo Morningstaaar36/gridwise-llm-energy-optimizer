@@ -55,7 +55,7 @@ class Settings(BaseSettings):
         return bool(self.llm_fallback_base_url and self.llm_fallback_model)
 
     @model_validator(mode="after")
-    def require_some_language_model(self) -> "Settings":
+    def require_some_language_model(self) -> Settings:
         """Fail fast at startup rather than at the judge's first request.
 
         A deployment with no reachable model cannot satisfy the mandatory

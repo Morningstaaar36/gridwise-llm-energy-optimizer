@@ -28,7 +28,9 @@ from app.contracts import EnergyRequest
 
 PROMPT_VERSION = "v1"
 
-_SCHEMA_PATH = pathlib.Path(__file__).resolve().parent.parent.parent / "schemas" / "directive.schema.json"
+_SCHEMA_PATH = (
+    pathlib.Path(__file__).resolve().parent.parent.parent / "schemas" / "directive.schema.json"
+)
 DIRECTIVE_SCHEMA = json.loads(_SCHEMA_PATH.read_text())
 
 # Interleaved between words of untrusted text so the model can see exactly where
