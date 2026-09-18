@@ -2,6 +2,8 @@
 
 Prepared from the supplied participant documents on 18 September 2026. This is a proposed implementation plan; the repository currently contains the three challenge documents and no application code. Track implementation progress in [TASKS.md](../TASKS.md).
 
+> **Superseded in part.** Sections 6, 8 and 11 of this document assume a single-sample interpreter. See [ARCHITECTURE_CLAMP.md](ARCHITECTURE_CLAMP.md) for the reviewed and refined architecture, and [RESEARCH_LINKS.md](RESEARCH_LINKS.md) for the 2025-2026 literature it builds on. The LP formulation in section 8 was verified exact against all ten public reference costs and stands unchanged.
+
 The recommended solution is a small, modular Python service: a language model interprets operator notes, deterministic code validates and compiles those interpretations, a linear program finds the cheapest valid schedule, and an independent verifier checks the exact response before it leaves the API. Use substantial AI assistance to develop and challenge each module, while keeping the production request path short and measurable.
 
 The distinctive engineering contribution should be traceability from each note to its mathematical effect, exact optimization, and independent verification. Adding many runtime agents would only be worthwhile if measured interpretation improvements justify the added latency.
