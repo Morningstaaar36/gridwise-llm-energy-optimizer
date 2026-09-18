@@ -4,7 +4,12 @@
 clarity of architecture and correctness of every claim, not production value. Every number below
 is quoted from a committed file under `evals/reports/`; do not state a number that isn't there.
 
-Record on Linux (Siyam), screen-captured against the **live Azure endpoint**, not localhost.
+Recorded by Ridwan (macOS), screen-captured against the **live Azure endpoint**, not localhost.
+
+macOS notes for the demo commands below: they need `jq` (`brew install jq`) and a clone of this
+repo with the `gridwise` conda environment active, since they read `fixtures/public_cases.json`.
+Run them from the repo root. Nothing else is macOS-specific — the endpoint is the deployed one,
+so no local service needs to be running.
 
 ---
 
