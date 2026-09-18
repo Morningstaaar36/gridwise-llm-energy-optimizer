@@ -81,3 +81,71 @@ def test_duals_are_shaped_per_hour_when_present():
     assert result.duals is not None
     for key in ("balance", "battery_state", "grid", "solar", "charge", "discharge", "reserve"):
         assert result.duals[key].shape == (24,)
+
+
+# --- end-of-day neutrality vs. an hour-23 reserve floor ----------------------
+#
+# The neutrality bound on e[23] used to be assigned outright, which silently
+# replaced hour 23's reserve floor and dropped a minimum_battery_reserve
+# directive covering that hour from the LP entirely. The plan came back
+# "successful" while ignoring a hard directive, and only the independent replay
+# caught it. The bound is now the intersection of the two.
+
+
+def _flat_request(initial=200.0, minimum=50.0, capacity=500.0):
+    from app.contracts import Battery, EnergyRequest, HourEntry
+
+    return EnergyRequest(
+        scenario_id="NEUTRALITY",
+        operator_notes=["n"],
+        hours=[
+            HourEntry(hour=h, demand_kwh=100.0, solar_kwh=0.0, tariff_bdt_per_kwh=10.0)
+            for h in range(24)
+        ],
+        battery=Battery(
+            capacity_kwh=capacity,
+            initial_energy_kwh=initial,
+            minimum_energy_kwh=minimum,
+            max_charge_kwh_per_hour=100.0,
+            max_discharge_kwh_per_hour=100.0,
+        ),
+    )
+
+
+def _tensor_with_hour23_reserve(request, reserve_kwh):
+    from pydantic import TypeAdapter
+
+    from app.contracts import Directive
+    from app.energy.compiler import compile_constraints
+
+    directives = TypeAdapter(list[Directive]).validate_python(
+        [
+            {
+                "note_index": 0,
+                "applies": True,
+                "directive_type": "minimum_battery_reserve",
+                "structured_adjustment": {"hours": [23], "minimum_energy_kwh": reserve_kwh},
+                "explanation": "hour 23 reserve",
+            }
+        ]
+    )
+    return compile_constraints(request, directives)
+
+
+def test_hour23_reserve_below_initial_is_still_enforced():
+    """A satisfiable hour-23 floor must survive the neutrality bound."""
+    from app.energy.optimizer import solve_energy
+
+    request = _flat_request(initial=200.0)
+    result = solve_energy(request, _tensor_with_hour23_reserve(request, 150.0))
+    assert result.success
+    assert result.energy[23] == pytest.approx(200.0, abs=1e-6)
+
+
+def test_hour23_reserve_above_initial_is_reported_infeasible_not_silently_dropped():
+    """Contradictory with neutrality -> infeasible, never a directive-violating plan."""
+    from app.energy.optimizer import solve_energy
+
+    request = _flat_request(initial=200.0)
+    result = solve_energy(request, _tensor_with_hour23_reserve(request, 300.0))
+    assert not result.success, "LP must not return a plan that ignores the hour-23 reserve"

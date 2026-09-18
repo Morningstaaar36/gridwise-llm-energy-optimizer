@@ -60,7 +60,14 @@ def solve_energy(request: EnergyRequest, tensor: ConstraintTensor) -> SolveResul
     # negative lower bound must be set explicitly or discharge is impossible.
     bounds += [(-tensor.discharge[h], tensor.charge[h]) for h in range(_H)]
     bounds += [(tensor.reserve[h], capacity) for h in range(_H)]
-    bounds[_E + _H - 1] = (initial_energy, initial_energy)  # end-of-day neutrality
+    # End-of-day neutrality pins e[23] to the starting energy. Intersect with
+    # hour 23's reserve floor rather than replacing it: assigning
+    # (initial, initial) outright would silently drop a minimum_battery_reserve
+    # directive that covers hour 23. If that floor is above the starting energy
+    # the two are genuinely contradictory, and lo > hi makes linprog report
+    # infeasibility -- the honest answer -- instead of returning a plan that
+    # ignores the directive and only fails later in replay.
+    bounds[_E + _H - 1] = (max(tensor.reserve[_H - 1], initial_energy), initial_energy)
 
     result = linprog(cost, A_eq=a_eq, b_eq=b_eq, bounds=bounds, method="highs")
 
