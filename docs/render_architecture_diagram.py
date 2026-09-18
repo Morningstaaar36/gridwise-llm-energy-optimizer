@@ -22,10 +22,10 @@ from PIL import Image, ImageDraw, ImageFont
 DOCS = pathlib.Path(__file__).resolve().parent
 CONFIG = DOCS / "mermaid_config.json"
 ROWS = [
-    (DOCS / "architecture_row1.mmd", "Interpretation  (Siyam — app/interpretation/)"),
+    (DOCS / "architecture_row1.mmd", "Interpretation  (app/interpretation/)"),
     (
         DOCS / "architecture_row2.mmd",
-        "Energy & Verification  (Daddy — app/energy/, app/verification/)",
+        "Energy & Verification  (app/energy/, app/verification/)",
     ),
 ]
 OUT = DOCS / "architecture_flow.png"
