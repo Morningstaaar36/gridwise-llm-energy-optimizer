@@ -1,7 +1,7 @@
 """Independent replay verifier.
 
 Rebuilds every bound from the raw request and the *reported* directives,
-deliberately never by calling app.energy.compiler — see TASKS.md D3.2. This
+deliberately never by calling app.energy.compiler. This
 is a second, independently written implementation of the bound rules, so a
 bug in the compiler (or in how the solver or response builder used its
 output) is not also invisible here. Walks the plan hour by hour from

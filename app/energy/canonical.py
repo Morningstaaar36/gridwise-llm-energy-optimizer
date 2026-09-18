@@ -1,6 +1,6 @@
 """CS3 — Constraint-Space Self-Consistency: cluster ensemble samples by meaning.
 
-See TASKS.md D3.1 and docs/ARCHITECTURE_CLAMP.md section 3.3. Two samples mean
+Two samples mean
 the same thing iff they compile to the same tensor, so clustering happens in
 executable constraint space rather than by approximate text similarity.
 """

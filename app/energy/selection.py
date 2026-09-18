@@ -1,6 +1,6 @@
 """Rubric-aware selection over the meet-semilattice.
 
-See TASKS.md D3.2 and docs/ARCHITECTURE_CLAMP.md sections 3.5-3.7. Reports
+Reports
 the single most likely interpretation as ``directive_interpretation`` but
 schedules against the meet of every plausible reading that is worth
 defending, because the two are scored separately and only the latter is

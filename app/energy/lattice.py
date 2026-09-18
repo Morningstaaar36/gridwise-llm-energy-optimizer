@@ -1,6 +1,6 @@
 """Meet-semilattice operations over constraint tensors.
 
-See TASKS.md D3.2 and docs/ARCHITECTURE_CLAMP.md section 3.2 (the Meet
+(the Meet
 Theorem). Every constraint family is a per-hour, one-sided bound, so taking
 the elementwise tighter bound across a set of tensors gives a schedule that
 satisfies every one of them simultaneously. Infeasibility is monotone: if a
@@ -22,7 +22,8 @@ def meet(tensors: list[ConstraintTensor]) -> ConstraintTensor:
     """Elementwise greatest lower bound: tighter ceilings, higher floors.
 
     A schedule feasible under ``meet(tensors)`` satisfies every tensor in
-    ``tensors`` simultaneously (Meet Theorem, ARCHITECTURE_CLAMP.md #3.2).
+    ``tensors`` simultaneously: the meet takes the elementwise tightest bound,
+    so satisfying it implies satisfying each input tensor individually.
     """
     if not tensors:
         raise ValueError("meet requires at least one tensor")

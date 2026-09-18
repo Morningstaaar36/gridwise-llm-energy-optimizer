@@ -26,9 +26,9 @@ Verification, compiler → meet-hedge → LP → replay → response). Source is
 `docs/architecture_row1.mmd` / `architecture_row2.mmd`; regenerate with
 `python docs/render_architecture_diagram.py` (needs `pip install pillow` once) if the pipeline
 ever changes. It's a landscape ~3.4:1 image, a bit wider than 16:9 — letterbox it rather than
-stretching. Do **not** use the more detailed flowchart in `docs/ARCHITECTURE_CLAMP.md` §3.8 —
-that one shows a calibrated plausible-set step (`S_alpha` / `HEDGE_ALPHA`) that was never actually
-wired into `app/energy/selection.py`; see `README.md`'s *Known limitations* section.
+stretching. Use only this rendered diagram — do not sketch a plausible-set / `HEDGE_ALPHA` step
+on screen, because that was never wired into `app/energy/selection.py`; see `README.md`'s
+*Known limitations* section.
 
 **Say:**
 > "A language model is mandatory here, not optional — 'reduced by 80%' and 'reduced to 80%' share

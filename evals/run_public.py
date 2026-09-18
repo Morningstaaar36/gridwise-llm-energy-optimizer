@@ -1,6 +1,6 @@
 """B4.3 — the ten public cases over live HTTP, against the fully merged system.
 
-This is the gate TASKS.md calls out explicitly: "the one that matters." Every
+This is the end-to-end acceptance gate for the whole system. Every
 other check in the repo tests a piece in isolation (the LP against ground
 truth, the compiler in isolation, the interpreter against paraphrases). This
 is the only script that drives a running HTTP server with the real model on
@@ -16,7 +16,7 @@ For each of the 10 public cases:
   - compare recalculated cost against the published reference
 
 A cost above reference is only acceptable when the hedge visibly widened the
-candidate set (see docs/ARCHITECTURE_CLAMP.md); anything else is a bug to
+candidate set; anything else is a bug to
 investigate before Gate 5.
 
 Usage:

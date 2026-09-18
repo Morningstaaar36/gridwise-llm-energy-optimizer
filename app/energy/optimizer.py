@@ -1,6 +1,7 @@
 """Signed-flow linear program: the cheapest 24-hour schedule under compiled bounds.
 
-See TASKS.md D2.2. Run off the async event loop when called from the API.
+Run off the async event loop when called from the API: the solve is
+synchronous and CPU-bound.
 """
 
 from __future__ import annotations

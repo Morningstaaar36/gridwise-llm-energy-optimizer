@@ -212,7 +212,7 @@ async def main(k: int, base_url: str | None) -> int:
     print(f"mean within-cluster agreement: {summary['mean_cluster_agreement']*100:.0f}%")
     print(f"report written: {out_path.relative_to(ROOT)}")
 
-    return 0 if exact >= 18 else 1  # TASKS.md S3.2 gate: >=18/20 on the seed clusters
+    return 0 if exact >= 18 else 1  # acceptance gate: >=18/20 exact on the seed clusters
 
 
 if __name__ == "__main__":

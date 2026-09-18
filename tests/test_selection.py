@@ -27,7 +27,7 @@ def test_plan_energy_matches_reference_on_every_public_case(case):
 
 
 def test_hedge_reproduces_the_measured_clamp_premium():
-    """docs/ARCHITECTURE_CLAMP.md #5 measured SAMPLE-01's hedge at exactly
+    """The recorded worst-case measurement put SAMPLE-01's hedge at exactly
     39730 BDT (nominal 38365, +3.558%) using 4 candidates built the same way
     as tests/stubs/fake_interpreter.disagreeing_samples()."""
     request = EnergyRequest(**_SAMPLE_01["input"])

@@ -1,6 +1,6 @@
 """Dual-certified per-note cost attribution.
 
-See TASKS.md D3.2 and docs/ARCHITECTURE_CLAMP.md section 3.7. HiGHS's shadow
+HiGHS's shadow
 prices give a first-order estimate of a bound's marginal cost with no extra
 solve: empirically (see scratch verification), scipy's `linprog` reports
 ``dual`` such that ``d(cost) ~= dual * d(bound)`` at the solved point, for

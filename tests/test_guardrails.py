@@ -1,6 +1,6 @@
 """Guardrail rejection coverage.
 
-Every rejection reason named in TASKS.md S2.4 gets a case here. The point of
+Every distinct rejection reason gets a case here. The point of
 this file is adversarial: model output is untrusted, so each test asserts we
 *refuse* rather than silently repair.
 """

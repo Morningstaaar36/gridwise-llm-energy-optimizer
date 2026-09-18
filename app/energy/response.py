@@ -1,6 +1,6 @@
 """Convert a solved LP into the outbound EnergyResponse.
 
-See TASKS.md D3.2. Totals are recomputed from the exact values being
+Totals are recomputed from the exact values being
 serialized rather than reused from the solver's own objective, so a
 normalization bug can never silently disagree with the numbers a judge sees.
 """

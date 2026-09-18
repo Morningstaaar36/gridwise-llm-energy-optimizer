@@ -1,7 +1,7 @@
 """Compile accepted directives into explicit per-hour constraint bounds.
 
-See TASKS.md D2.1 and docs/ARCHITECTURE_CLAMP.md #2 for the overlapping
-solar-reduction composition rule.
+The overlapping solar-reduction composition rule is documented on
+``compile_constraints`` below.
 """
 
 from __future__ import annotations

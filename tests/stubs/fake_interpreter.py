@@ -1,4 +1,4 @@
-"""Daddy's stand-in for Siyam's ``interpret_notes`` — see TASKS.md section 3.
+"""Stand-in for ``app.interpretation.ensemble.interpret_notes``.
 
 Development/test fixture only. Never imported from ``app/``.
 """

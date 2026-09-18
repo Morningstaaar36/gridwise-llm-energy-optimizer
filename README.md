@@ -135,8 +135,7 @@ paraphrase introduces, has no notion of *confidence*, and cannot be measured for
 robustness — which the rubric scores directly. GridWise instead samples `LLM_SAMPLES` structured
 interpretations in one batched call, clusters them by **exact compiled-tensor equality** (CS³,
 `app/energy/canonical.py`), and reports the majority reading while scheduling against the meet of
-every reading worth defending (`app/energy/selection.py`) — see *The CLAMP hedge* below and
-`docs/ARCHITECTURE_CLAMP.md`.
+every reading worth defending (`app/energy/selection.py`) — see *The CLAMP hedge* below.
 
 ## The guardrails
 
@@ -169,7 +168,8 @@ Two things are scored separately: the interpretation you *report*, and the sched
 (replayed against the judge's hidden ground truth). GridWise reports the ensemble's majority
 reading but schedules against the elementwise **meet** of every reading whose posterior is worth
 defending — a schedule feasible under the meet satisfies every one of those readings at once
-(`docs/ARCHITECTURE_CLAMP.md` §3.2, the Meet Theorem). This costs a small premium only when the
+(the meet is the elementwise tightest bound, so feasibility under it implies feasibility under
+each reading individually). This costs a small premium only when the
 ensemble actually disagrees; when it agrees, the premium is exactly zero.
 
 **Measured** (`evals/reports/hedging_report_20260918_155109.txt`, worst-case synthetic
@@ -219,13 +219,12 @@ model access: Google Gemini, Groq, and locally-served Ollama (`qwen3:8b`) as an 
 - **Overlapping `solar_reduction` composition is an interim assumption.** The problem statement
   doesn't define how two solar-reduction directives on the same hour combine; GridWise defaults to
   the *product* of their factors — the tightest reading, and provably safe under any looser
-  reading since unused solar may always be curtailed for free (`docs/ARCHITECTURE_CLAMP.md` §2).
+  reading since unused solar may always be curtailed for free.
 - **`HEDGE_ALPHA` is reserved, not wired up.** The design notes describe a split-conformal
   plausible-set cutoff; the shipped selector instead does full bounded subset enumeration
   (`HEDGE_MAX_CANDIDATES`) with monotone-infeasibility pruning and expected-score selection. Both
   approaches ship a valid schedule; the conformal cutoff would only change *which* candidates are
-  considered, and its coverage guarantee would not transfer to unseen hidden notes regardless
-  (`docs/ARCHITECTURE_CLAMP.md` §3.4, §9).
+  considered, and its coverage guarantee would not transfer to unseen hidden notes regardless.
 - **The measured hedge premium is a worst-case bound**, built from synthetic maximal disagreement.
   In service the premium is zero whenever the K-sample ensemble agrees, which is the common case.
 - **Free-tier provider quota is shared and finite.** Sustained testing during development
@@ -254,9 +253,7 @@ Everything above is the judge-facing submission. The rest of this file is our ow
 pre-round environment setup and two-person workflow, kept for reproducibility on our
 machines. Judges do not need any of it; the quickstart above is self-contained.
 
-The internal build plan and gate checklist live in [TASKS.md](TASKS.md). Design rationale is in
-[docs/ARCHITECTURE_CLAMP.md](docs/ARCHITECTURE_CLAMP.md); sources and prior work in
-[docs/RESEARCH_LINKS.md](docs/RESEARCH_LINKS.md).
+The deployment runbook is in [deploy/azure.md](deploy/azure.md).
 
 ## Cross-platform environment setup (Linux + macOS)
 
@@ -453,7 +450,7 @@ Run `make lock` on **Linux** and commit that file; it is the one the Docker imag
 Daddy runs `make lock` too and compares — any package that differs in major/minor version gets
 resolved before the round, not during it.
 
-Now go to **[TASKS.md](TASKS.md)**. Do not start Gate 1 until the round opens.
+That completes the environment setup.
 
 ---
 

@@ -11,3 +11,9 @@ venv/
 evals/reports/*.tmp
 requirements.lock.txt.bak
 .DS_Store
+
+# Internal planning/research docs — kept locally, never committed.
+TASKS.md
+docs/IMPLEMENTATION_PLAN.md
+docs/ARCHITECTURE_CLAMP.md
+docs/RESEARCH_LINKS.md
