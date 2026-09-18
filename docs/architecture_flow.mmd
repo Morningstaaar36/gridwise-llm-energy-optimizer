@@ -1,0 +1,11 @@
+flowchart LR
+    A[1-3 operator notes] --> B["LLM: K samples in ONE call"]
+    B --> C[Guardrails - drop invalid]
+    C --> D["CS3: cluster by tensor equality"]
+    D --> E[Report argmax as directive_interpretation]
+    D --> F[Compiler: directives -> constraint tensor]
+    F --> G["Meet-hedge: subset scan, prune, expected-score select"]
+    G --> H["LP solver - HiGHS"]
+    H --> I[Independent replay - raw request only]
+    I -->|pass| J[200: plan + summary]
+    I -->|fail| K[Controlled error]

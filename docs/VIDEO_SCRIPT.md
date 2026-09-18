@@ -20,8 +20,12 @@ Record on Linux (Siyam), screen-captured against the **live Azure endpoint**, no
 
 ## 0:25–1:15 — Architecture
 
-**Show:** one diagram (recommend a screenshot of the flow described in `docs/ARCHITECTURE_CLAMP.md`
-§3.8, or draw it live): `notes → LLM (K samples) → guardrails → compiler → LP → replay → response`.
+**Show:** `docs/architecture_flow.png` — a single-row flowchart of the actual shipped pipeline
+(rendered from `docs/architecture_flow.mmd`; re-render with `npx @mermaid-js/mermaid-cli` if it
+ever needs updating). It's wider than 16:9, so letterbox it (black bars top/bottom) rather than
+stretching it. Do **not** use the more detailed flowchart in `docs/ARCHITECTURE_CLAMP.md` §3.8 —
+that one shows a calibrated plausible-set step (`S_alpha` / `HEDGE_ALPHA`) that was never actually
+wired into `app/energy/selection.py`; see `README.md`'s *Known limitations* section.
 
 **Say:**
 > "A language model is mandatory here, not optional — 'reduced by 80%' and 'reduced to 80%' share
