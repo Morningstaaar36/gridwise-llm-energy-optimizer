@@ -12,18 +12,10 @@ import time
 
 from app.config import Settings
 from app.contracts import EnergyRequest, EnergyResponse, ErrorCategory, GridWiseError
+from app.energy.selection import plan_energy
 from app.interpretation.ensemble import interpret_notes
 from app.interpretation.provider import LLMProvider
 from app.observability import RequestTrace, get_logger
-
-# --- GATE 4 (B4.2) SWAP POINT ------------------------------------------------
-# Until feat/energy-verify merges this resolves to the development stub. At
-# Gate 4 this single import becomes:
-#     from app.energy.selection import plan_energy
-# and `grep -rn "tests.stubs" app/` must return nothing.
-from tests.stubs.fake_energy import plan_energy  # noqa: E402
-
-# -----------------------------------------------------------------------------
 
 logger = get_logger(__name__)
 
