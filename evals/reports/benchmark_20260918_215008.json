@@ -1,0 +1,69 @@
+{
+  "timestamp": "2026-09-18T15:49:58Z",
+  "latency": {
+    "cold_first_request_s": 1.828,
+    "sequential_n": 4,
+    "sequential_p50_s": 1.39,
+    "sequential_p95_s": 1.503,
+    "concurrent_n": 4,
+    "concurrent_p50_s": 1.932,
+    "concurrent_p95_s": 2.988,
+    "overall_warm_p50_s": 1.471,
+    "overall_warm_p95_s": 2.988,
+    "non_200_responses": [],
+    "scored_band": "3/3"
+  },
+  "failure_injection": [
+    {
+      "scenario": "malformed_json",
+      "http_status": 500,
+      "error_category": "invalid_interpretation",
+      "provider_calls": 2,
+      "body_is_controlled": true,
+      "leaked_secret": false,
+      "service_still_up": true
+    },
+    {
+      "scenario": "timeout",
+      "http_status": 500,
+      "error_category": "provider_failure",
+      "provider_calls": 2,
+      "body_is_controlled": true,
+      "leaked_secret": false,
+      "service_still_up": true
+    },
+    {
+      "scenario": "auth_401",
+      "http_status": 500,
+      "error_category": "provider_failure",
+      "provider_calls": 2,
+      "body_is_controlled": true,
+      "leaked_secret": false,
+      "service_still_up": true
+    },
+    {
+      "scenario": "rate_limit_429",
+      "http_status": 500,
+      "error_category": "provider_failure",
+      "provider_calls": 2,
+      "body_is_controlled": true,
+      "leaked_secret": false,
+      "service_still_up": true
+    },
+    {
+      "scenario": "full_outage",
+      "http_status": 500,
+      "error_category": "provider_failure",
+      "provider_calls": 2,
+      "body_is_controlled": true,
+      "leaked_secret": false,
+      "service_still_up": true
+    }
+  ],
+  "failure_injection_summary": {
+    "secret_leaks": [],
+    "uncontrolled_bodies": [],
+    "service_down_after": [],
+    "unbounded_attempts": []
+  }
+}
