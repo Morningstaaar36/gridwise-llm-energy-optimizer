@@ -11,9 +11,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 # Dependency layer first so code edits do not invalidate the pip cache.
-# Swap to requirements.lock.txt once `make lock` has been run (Gate 5).
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+# Locked at Gate 5 (v1.0 freeze) so the image matches what was tested, not
+# whatever requirements.txt's version ranges happen to resolve to today.
+COPY requirements.lock.txt ./
+RUN pip install --no-cache-dir -r requirements.lock.txt
 
 COPY app/ ./app/
 COPY schemas/ ./schemas/

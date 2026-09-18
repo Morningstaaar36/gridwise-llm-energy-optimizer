@@ -9,11 +9,10 @@ replayed against the organizer's hidden ground truth.
 
 from __future__ import annotations
 
-import os
-
 import numpy as np
 from scipy.optimize import linprog
 
+from app.config import get_settings
 from app.contracts import (
     ConstraintTensor,
     EnergyRequest,
@@ -32,16 +31,15 @@ from app.verification.replay import replay
 _SLACK_EPSILON = 1e-9
 _H = 24
 
-
-def _env_bool(name: str, default: bool) -> bool:
-    raw = os.getenv(name)
-    if raw is None:
-        return default
-    return raw.strip().lower() not in ("false", "0", "no", "")
-
-
-HEDGE_ENABLED = _env_bool("HEDGE_ENABLED", True)
-HEDGE_MAX_CANDIDATES = int(os.getenv("HEDGE_MAX_CANDIDATES", "5"))
+# Sourced from the shared Settings object rather than a second, parallel
+# os.getenv() read: Settings already parses .env correctly (including
+# stripping inline "# comment" text, which a bare os.getenv() + int() does
+# not) and already defines these two fields with validated bounds. Module
+# constants are kept, not inlined at each call site, so
+# monkeypatch.setattr(selection, "HEDGE_ENABLED", False) in tests keeps
+# working unchanged.
+HEDGE_ENABLED = get_settings().hedge_enabled
+HEDGE_MAX_CANDIDATES = get_settings().hedge_max_candidates
 
 
 def _expected_score(coverage: float, nominal_cost: float, candidate_cost: float) -> float:
