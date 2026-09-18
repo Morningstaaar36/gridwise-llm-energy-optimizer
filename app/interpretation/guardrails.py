@@ -72,6 +72,25 @@ def _normalise_explanation(entry: dict[str, Any]) -> None:
         entry["explanation"] = "Interpretation of the operator note."
 
 
+def _strip_null_magnitudes(entry: dict[str, Any]) -> None:
+    """Drop magnitude keys that are explicitly null and belong to another type.
+
+    Strict structured-output mode cannot express "required only for this
+    directive type", so the schema marks every magnitude nullable and models
+    dutifully emit all three with nulls for the irrelevant ones. Removing an
+    explicit ``null`` invents nothing — there is no value being guessed. A
+    *non-null* value under the wrong key still fails, because that signals the
+    model was confused about the directive, not merely about the envelope.
+    """
+    adjustment = entry.get("structured_adjustment")
+    if not isinstance(adjustment, dict):
+        return
+    keep = _MAGNITUDE_KEY.get(entry.get("directive_type"))  # type: ignore[arg-type]
+    for key in ("factor", "minimum_energy_kwh", "max_grid_kwh"):
+        if key != keep and adjustment.get(key, ...) is None:
+            adjustment.pop(key)
+
+
 def _normalise_hours(entry: dict[str, Any], index: int) -> None:
     """Sort merely-unordered hours in place; reject anything genuinely wrong.
 
@@ -129,6 +148,7 @@ def validate(request: EnergyRequest, raw: Any) -> list[Directive]:
         if not isinstance(entry, dict):
             raise _reject(f"entry {position} is not an object")
         _normalise_explanation(entry)
+        _strip_null_magnitudes(entry)
         _normalise_hours(entry, position)
         _check_magnitude_present(entry, position)
 

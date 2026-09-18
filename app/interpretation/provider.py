@@ -118,6 +118,7 @@ class LLMProvider:
             ],
             "temperature": self._settings.llm_temperature,
             "response_format": _response_format(strict),
+            "max_tokens": self._settings.llm_max_completion_tokens,
         }
         if n > 1:
             kwargs["n"] = n

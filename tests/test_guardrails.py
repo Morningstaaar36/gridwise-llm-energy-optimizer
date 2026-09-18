@@ -234,3 +234,22 @@ def test_rejection_messages_never_echo_operator_note_text():
         for word in note.split():
             if len(word) > 6:
                 assert word.lower() not in error.message.lower()
+
+
+# --- strict-schema envelope artefacts ---------------------------------------
+
+
+def test_null_magnitudes_from_strict_schema_are_stripped():
+    """Strict mode forces all magnitudes to be present; nulls must not reject."""
+    entries = mutate_adjustment(minimum_energy_kwh=None, max_grid_kwh=None)
+    directives = validate(BASE_REQUEST, envelope(entries))
+    assert directives[0].structured_adjustment.factor == 0.25
+
+
+def test_non_null_wrong_magnitude_is_still_rejected():
+    """A real value under the wrong key means the model was confused."""
+    expect_reject(BASE_REQUEST, envelope(mutate_adjustment(minimum_energy_kwh=120)))
+
+
+def test_null_own_magnitude_is_rejected_not_defaulted():
+    expect_reject(BASE_REQUEST, envelope(mutate_adjustment(factor=None)))

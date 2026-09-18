@@ -36,6 +36,7 @@ class Settings(BaseSettings):
     llm_temperature: float = Field(default=0.7, ge=0.0, le=2.0)
     llm_timeout_seconds: float = Field(default=8.0, gt=0)
     llm_max_attempts: int = Field(default=2, ge=1, le=4)
+    llm_max_completion_tokens: int = Field(default=700, ge=200, le=4096)
     request_deadline_seconds: float = Field(default=27.0, gt=0)
     hedge_alpha: float = Field(default=0.10, ge=0.0, le=1.0)
     hedge_max_candidates: int = Field(default=5, ge=1, le=8)
