@@ -1,24 +1,6 @@
-# GridWise — environment setup
+# GridWise — LLM-assisted campus energy optimization
 
-BUP CSE Fest 2026 · Online Preliminary · LLM-assisted operator-directive interpretation.
-
-**This file covers environment creation only.** Do the whole of it **before the round opens**,
-on both machines, and stop at the "Setup is done" checkpoint.
-
-| Document | Read it for |
-|---|---|
-| **README.md** (this file) | Getting a working environment on Linux and macOS. Nothing else. |
-| **[TASKS.md](TASKS.md)** | Who builds what, in what order, on which branch, with acceptance gates. **This is the file to follow during the round.** |
-| [docs/ARCHITECTURE_CLAMP.md](docs/ARCHITECTURE_CLAMP.md) | Why the system is shaped the way it is. Reference. |
-| [docs/RESEARCH_LINKS.md](docs/RESEARCH_LINKS.md) | Papers, repos, models. Reference, and source material for the video. |
-| [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) | Earlier long-form plan. Superseded in part — see its header note. |
-
-At **Gate 7** this file gets *extended* (not replaced) with the judge-facing quickstart, because
-Documentation & Local Reproducibility is worth 10 points. Until then it is setup only.
-
----
-
-# For judges
+BUP CSE Fest 2026 · Online Preliminary · `POST /optimize-energy`
 
 ## What this is
 
@@ -30,13 +12,28 @@ validation, constraint compilation, optimization, and verification — is determ
 
 ## Public base URL
 
-<!-- TODO(Gate 6/7): fill in once Siyam's Azure Container Apps deployment is live. -->
-**`https://<TODO-fill-in-fqdn>`** — `GET /health`, `POST /optimize-energy`.
+**`https://gridwise.mangowater-ca3ac31c.southeastasia.azurecontainerapps.io`**
+
+- `GET /health` → `{"status":"ok"}`
+- `POST /optimize-energy` → interpretation + 24-hour plan
+
+No login, VPN, or allowlisting required. Note there is deliberately no route at `/` — the
+specification defines only the two endpoints above, so a browser hitting the bare base URL
+correctly gets a `404`; use `/health` to check liveness.
+
+Quick check:
+
+```bash
+curl -fsS https://gridwise.mangowater-ca3ac31c.southeastasia.azurecontainerapps.io/health
+```
+
+Verified against all ten public cases on this live URL: 10/10 valid, 10/10 interpretation
+correct, 10/10 replay clean — see `evals/reports/public_cases_20260918_221601.json`.
 
 ## Local quickstart (judges: run this on a clean machine)
 
 ```bash
-git clone <REPO_URL> gridwise-llm-energy-optimizer
+git clone https://github.com/Morningstaaar36/gridwise-llm-energy-optimizer.git
 cd gridwise-llm-energy-optimizer
 
 conda env create -f environment.yml
@@ -150,14 +147,32 @@ constraint-correctness category from a single wrong reading. One case (SAMPLE-05
 infeasible full meet; monotone-infeasibility pruning dropped it to 3 of 4 candidates rather than
 failing outright.
 
-## Docker
+## Docker (fallback execution path)
 
-<!-- TODO(Gate 6/7): fill in the exact digest once Siyam pushes the image. -->
+Public image, pullable with no credentials:
+
+```
+ghcr.io/morningstaaar36/gridwise:v1.0
+digest: sha256:8dd07e67fb218541ad6cb00f0dc549dacd952f573d9d9e8600ae6ae9b5cfd1eb
+port:   8000  (honours $PORT; binds 0.0.0.0; runs as non-root uid 10001)
+```
+
 ```bash
-docker pull ghcr.io/<TODO>/gridwise@sha256:<TODO-exact-digest>
-docker run --rm -p 8000:8000 --env-file .env ghcr.io/<TODO>/gridwise@sha256:<TODO-exact-digest>
+# by digest (exact, immutable)
+docker pull ghcr.io/morningstaaar36/gridwise@sha256:8dd07e67fb218541ad6cb00f0dc549dacd952f573d9d9e8600ae6ae9b5cfd1eb
+docker run --rm -p 8000:8000 --env-file .env \
+  ghcr.io/morningstaaar36/gridwise@sha256:8dd07e67fb218541ad6cb00f0dc549dacd952f573d9d9e8600ae6ae9b5cfd1eb
 curl -fsS http://localhost:8000/health
 ```
+
+The image contains **no credentials** — every layer was scanned for both configured provider
+keys before publishing. Supply them at runtime via `--env-file .env` (names in `.env.example`).
+
+> **`--env-file` gotcha, already handled in `.env.example`:** Docker's `--env-file` and Azure
+> Container Apps both set these as literal OS environment variables and, unlike
+> pydantic-settings' own dotenv reader, do **not** strip a trailing `# comment`. A value written
+> `LLM_SAMPLES=5   # note` would reach `int()` with the comment attached and crash startup. Every
+> value in `.env.example` therefore keeps its comment on its own line — preserve that if you edit it.
 
 ## Credited dependencies
 
@@ -200,6 +215,18 @@ with no baked-in secrets; credentials are supplied at container-run / Container-
 only.
 
 ---
+
+# Appendix — team development notes
+
+Everything above is the judge-facing submission. The rest of this file is our own
+pre-round environment setup and two-person workflow, kept for reproducibility on our
+machines. Judges do not need any of it; the quickstart above is self-contained.
+
+The internal build plan and gate checklist live in [TASKS.md](TASKS.md). Design rationale is in
+[docs/ARCHITECTURE_CLAMP.md](docs/ARCHITECTURE_CLAMP.md); sources and prior work in
+[docs/RESEARCH_LINKS.md](docs/RESEARCH_LINKS.md).
+
+## Cross-platform environment setup (Linux + macOS)
 
 ## 0. Who is on what
 
@@ -273,7 +300,7 @@ Daddy does not need `az`.
 ## 2. Create the conda environment — both machines
 
 ```bash
-git clone <REPO_URL> gridwise-llm-energy-optimizer
+git clone https://github.com/Morningstaaar36/gridwise-llm-energy-optimizer.git
 cd gridwise-llm-energy-optimizer
 
 conda env create -f environment.yml
