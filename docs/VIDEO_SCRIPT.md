@@ -66,13 +66,15 @@ nothing.
 
 ## 2:05–2:40 — Live demo
 
-Against the **live deployed endpoint** (fill in the FQDN before recording):
+Against the **live deployed endpoint**:
 
 ```bash
-curl -fsS https://<FQDN>/health
+FQDN=gridwise.mangowater-ca3ac31c.southeastasia.azurecontainerapps.io
+
+curl -fsS https://$FQDN/health
 # {"status":"ok"}
 
-curl -s -X POST https://<FQDN>/optimize-energy \
+curl -s -X POST https://$FQDN/optimize-energy \
   -H "Content-Type: application/json" \
   -d "$(jq '.cases[5].input' fixtures/public_cases.json)" | jq '{total_cost_bdt, hourly_plan: .hourly_plan[10:12]}'
 ```
@@ -87,7 +89,7 @@ jq '.cases[5].input | .operator_notes[0] =
   "Cloud cover during panel inspection will leave only about 10 percent of forecast solar output from 10 AM until noon."' \
   fixtures/public_cases.json > /tmp/demo_changed.json
 
-curl -s -X POST https://<FQDN>/optimize-energy \
+curl -s -X POST https://$FQDN/optimize-energy \
   -H "Content-Type: application/json" \
   -d @/tmp/demo_changed.json | jq '{total_cost_bdt, hourly_plan: .hourly_plan[10:12]}'
 ```
@@ -108,8 +110,9 @@ endpoint during rehearsal before the real take.)*
 > locally."
 
 ```bash
-docker pull ghcr.io/<org>/gridwise@sha256:<digest>
-docker run --rm -p 8000:8000 --env-file .env ghcr.io/<org>/gridwise@sha256:<digest>
+docker pull ghcr.io/morningstaaar36/gridwise@sha256:8dd07e67fb218541ad6cb00f0dc549dacd952f573d9d9e8600ae6ae9b5cfd1eb
+docker run --rm -p 8000:8000 --env-file .env \
+  ghcr.io/morningstaaar36/gridwise@sha256:8dd07e67fb218541ad6cb00f0dc549dacd952f573d9d9e8600ae6ae9b5cfd1eb
 ```
 
 **Close:** "Full setup and every number quoted here are in the README and `evals/reports/`."
@@ -118,7 +121,6 @@ docker run --rm -p 8000:8000 --env-file .env ghcr.io/<org>/gridwise@sha256:<dige
 
 ## Recording checklist
 
-- [ ] FQDN and Docker digest filled in above before the take (see `README.md`'s placeholders)
 - [ ] Demo re-verified against the **live** endpoint during rehearsal, not just localhost
 - [ ] Total runtime ≤ 3:00
 - [ ] Every number spoken matches a file under `evals/reports/` — no number invented for the video
