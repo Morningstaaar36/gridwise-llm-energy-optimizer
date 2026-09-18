@@ -49,8 +49,19 @@ SUPPORTED DIRECTIVE TYPES — you may emit no others:
 6. no_op                  -> null
 
 TIME WINDOWS ARE START-INCLUSIVE AND END-EXCLUSIVE.
-"1 PM to 3 PM" is hours [13, 14] — NOT [13, 14, 15].
-"from 6 PM until 9 PM" is [18, 19, 20]. "noon to 2 PM" is [12, 13].
+Compute them, do not pattern-match. Convert both ends to 24-hour numbers, then
+list every integer from start up to but NOT INCLUDING end:
+
+    hours = [start, start+1, ..., end-1]        the last entry is always end-1
+
+"1 PM to 3 PM"        -> start 13, end 15 -> [13, 14]          not [13, 14, 15]
+"from 5 PM until 7 PM"-> start 17, end 19 -> [17, 18]          not [17, 18, 19]
+"from 6 PM until 9 PM"-> start 18, end 21 -> [18, 19, 20]      not [18, 19, 20, 21]
+"noon to 2 PM"        -> start 12, end 14 -> [12, 13]          not [12, 13, 14]
+"11 AM until 1 PM"    -> start 11, end 13 -> [11, 12]          not [11, 12, 13]
+
+"to", "until", "till", "through to", and a dash all mean the same thing here:
+the end hour is EXCLUDED. A window of N hours produces exactly N entries.
 Use 24-hour integers 0-23, unique, ascending. Midnight is 0, noon is 12.
 
 FACTOR IS THE FRACTION THAT REMAINS, NOT THE FRACTION REMOVED.

@@ -129,7 +129,13 @@ class LLMProvider:
                 {"role": "system", "content": prompt.system},
                 {"role": "user", "content": prompt.user},
             ],
-            "temperature": self._settings.llm_temperature,
+            # Temperature exists only to spread the K-sample ensemble. With a
+            # single sample there is no vote to diversify, so sampling noise is
+            # pure downside: it was observed flipping SAMPLE-08's window between
+            # [17,18] and [17,18,19] run to run. Go greedy when K == 1.
+            "temperature": (
+                0.0 if self._settings.llm_samples == 1 else self._settings.llm_temperature
+            ),
             "response_format": _response_format(strict),
             "max_tokens": self._settings.llm_max_completion_tokens,
         }

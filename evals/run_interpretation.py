@@ -29,7 +29,7 @@ import pathlib
 import statistics
 import sys
 import time
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
@@ -44,15 +44,27 @@ FIXTURES = ROOT / "fixtures" / "paraphrase_clusters.jsonl"
 REPORTS = ROOT / "evals" / "reports"
 
 _HOURS = [
-    HourEntry(hour=h, demand_kwh=100 + 5 * h, solar_kwh=max(0, 150 - abs(h - 13) * 15), tariff_bdt_per_kwh=8 + (h % 6))
+    HourEntry(
+        hour=h,
+        demand_kwh=100 + 5 * h,
+        solar_kwh=max(0, 150 - abs(h - 13) * 15),
+        tariff_bdt_per_kwh=8 + (h % 6),
+    )
     for h in range(24)
 ]
-_BATTERY = Battery(capacity_kwh=300, initial_energy_kwh=150, minimum_energy_kwh=30,
-                    max_charge_kwh_per_hour=80, max_discharge_kwh_per_hour=80)
+_BATTERY = Battery(
+    capacity_kwh=300,
+    initial_energy_kwh=150,
+    minimum_energy_kwh=30,
+    max_charge_kwh_per_hour=80,
+    max_discharge_kwh_per_hour=80,
+)
 
 
 def synthetic_request(note: str, scenario_id: str) -> EnergyRequest:
-    return EnergyRequest(scenario_id=scenario_id, operator_notes=[note], hours=_HOURS, battery=_BATTERY)
+    return EnergyRequest(
+        scenario_id=scenario_id, operator_notes=[note], hours=_HOURS, battery=_BATTERY
+    )
 
 
 @dataclass
@@ -73,7 +85,11 @@ class CaseResult:
 
 
 def matches(result: CaseResult) -> bool:
-    if result.invalid or result.got_type != result.expected_type or result.got_applies != result.expected_applies:
+    if (
+        result.invalid
+        or result.got_type != result.expected_type
+        or result.got_applies != result.expected_applies
+    ):
         return False
     if result.expected_adjustment is None:
         return result.got_adjustment is None
@@ -108,7 +124,8 @@ async def run_case(provider: LLMProvider, settings, line: dict, index: int) -> C
         directive = samples[0].directives[0]
         result.got_type = directive.directive_type.value
         result.got_applies = directive.applies
-        result.got_adjustment = directive.structured_adjustment.model_dump() if directive.structured_adjustment else None
+        adjustment = directive.structured_adjustment
+        result.got_adjustment = adjustment.model_dump() if adjustment else None
     except GridWiseError as exc:
         result.latency_s = time.perf_counter() - start
         result.invalid = True
@@ -177,7 +194,9 @@ async def main(k: int, base_url: str | None) -> int:
             for t, v in by_type.items()
         },
         "per_cluster_agreement": cluster_agreement,
-        "mean_cluster_agreement": round(statistics.mean(cluster_agreement.values()), 3) if cluster_agreement else 0.0,
+        "mean_cluster_agreement": (
+            round(statistics.mean(cluster_agreement.values()), 3) if cluster_agreement else 0.0
+        ),
         "latency_p50_s": pct(latencies, 0.50),
         "latency_p95_s": pct(latencies, 0.95),
         "cases": [asdict(r) for r in results],
@@ -198,7 +217,10 @@ async def main(k: int, base_url: str | None) -> int:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--k", type=int, default=1, help="samples per note (default 1: tests the prompt, not the hedge)")
+    parser.add_argument(
+        "--k", type=int, default=1,
+        help="samples per note (default 1: tests the prompt, not the hedge)",
+    )
     parser.add_argument("--base-url", default=None, help="override LLM_BASE_URL for this run")
     args = parser.parse_args()
     raise SystemExit(asyncio.run(main(args.k, args.base_url)))
